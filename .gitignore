@@ -1,0 +1,17 @@
+# 🤫 Streamlit 機密設定 (絕對不能上傳)
+.streamlit/
+
+# 🐍 Python 系統產生的暫存檔與虛擬環境
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# 💻 系統預設垃圾檔 (Mac / Windows)
+.DS_Store
+Thumbs.db
+
+
+ fantasy_db.json

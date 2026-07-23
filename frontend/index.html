@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodgers Data Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #000000; min-height: 100vh; overflow: hidden; font-family: 'Outfit', sans-serif; }
+
+        /* 背景影片 */
+        .video-container { position: fixed; bottom: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
+        #bg-video { width: 100%; height: 100%; object-fit: cover; opacity: 0.35; }
+
+        /* 道奇藍發光游標 */
+        .glass-cursor-card { position: fixed; z-index: 99999; pointer-events: none; padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; transform: translate(-50%, -50%) scale(0); opacity: 0; transition: opacity 0.3s ease; }
+        .glass-cursor-card.active { opacity: 1; }
+        .cursor-text { font-size: 0.75rem; font-weight: 700; color: #005A9C; text-transform: uppercase; text-shadow: 0 0 5px #005A9C; }
+        
+        /* 頁面切換控制：預設隱藏，加上 active 才會顯示 */
+        .page-section { display: none; opacity: 0; }
+        .page-section.active { display: flex; opacity: 1; }
+    </style>
+</head>
+<body class="text-white">
+
+    <div class="video-container">
+        <video autoplay muted playsinline loop id="bg-video">
+            <source src="bg.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <header class="w-full p-6 flex justify-between items-center bg-black/40 backdrop-blur-md border-b border-white/10 relative z-10">
+        <div class="text-2xl font-black tracking-widest text-[#005A9C] drop-shadow-[0_0_10px_rgba(0,90,156,0.8)]">
+            WAR ROOM
+        </div>
+        <nav class="flex gap-8">
+            <button id="nav-scout" onclick="switchTab('scout-page')" class="text-lg font-bold text-[#005A9C] transition-colors border-b-2 border-[#005A9C] pb-1">Scout 雷達</button>
+            <button id="nav-roster" onclick="switchTab('roster-page')" class="text-lg font-bold text-white/70 hover:text-white transition-colors border-b-2 border-transparent pb-1">Roster 陣容</button>
+        </nav>
+    </header>
+
+    <main id="scout-page" class="page-section active flex-col items-center pt-10 w-full max-w-4xl mx-auto px-4 relative z-10">
+        <h1 class="text-4xl font-bold mb-8 text-center text-white/90">Advanced Scouting Radar</h1>
+        
+        <div class="flex flex-col md:flex-row gap-4 w-full mb-8">
+            <input type="text" id="search-input" placeholder="輸入球員姓名 (例: Aaron Judge)" 
+                   class="w-full px-6 py-4 rounded-xl bg-black/50 border border-[#005A9C]/50 text-white backdrop-blur-lg focus:outline-none focus:ring-2 focus:ring-[#005A9C] text-lg">
+            <button id="search-btn" class="bg-[#005A9C] hover:bg-[#004A80] text-white font-bold py-4 px-10 rounded-xl transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,90,156,0.5)]">
+                Scan 📡
+            </button>
+        </div>
+
+        <div id="scout-card" class="w-full bg-black/60 border border-white/10 p-8 rounded-2xl backdrop-blur-xl shadow-2xl transform translate-y-10 opacity-0 relative overflow-hidden">
+            <div class="absolute -top-20 -right-20 w-64 h-64 bg-[#005A9C] rounded-full blur-[100px] opacity-30"></div>
+            
+            <h2 class="text-sm font-bold text-[#005A9C] mb-1 uppercase tracking-widest">Player Profile</h2>
+            <div id="player-info" class="text-4xl font-black text-white mb-6">等待雷達掃描...</div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white/5 border border-white/10 p-4 rounded-lg">
+                    <div class="text-xs text-gray-400 mb-1">預期加權上壘率 (xwOBA)</div>
+                    <div id="stat-xwoba" class="text-2xl font-bold text-white">-</div>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-4 rounded-lg">
+                    <div class="text-xs text-gray-400 mb-1">預期打擊率 (xBA)</div>
+                    <div id="stat-xba" class="text-2xl font-bold text-white">-</div>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-4 rounded-lg">
+                    <div class="text-xs text-gray-400 mb-1">平均擊球初速 (Exit Velocity)</div>
+                    <div id="stat-ev" class="text-2xl font-bold text-white">-</div>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-4 rounded-lg">
+                    <div class="text-xs text-gray-400 mb-1">強擊球比例 (HardHit%)</div>
+                    <div id="stat-hardhit" class="text-2xl font-bold text-[#005A9C] drop-shadow-[0_0_8px_rgba(0,90,156,0.8)]">-</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <main id="roster-page" class="page-section flex-col items-center pt-10 w-full max-w-4xl mx-auto px-4 relative z-10">
+        <h1 class="text-4xl font-bold mb-8 text-center text-white/90">My Team Roster</h1>
+        <div class="w-full bg-black/60 border border-white/10 p-10 rounded-2xl backdrop-blur-xl shadow-2xl text-center">
+            <div class="text-6xl mb-4">🏟️</div>
+            <h2 class="text-2xl font-bold text-white mb-2">陣容頁面建設中</h2>
+            <p class="text-gray-400">總教練，這裡未來將接入我們在 fantasy_team.py 寫好的「跨日調度陣容名單」！</p>
+        </div>
+    </main>
+
+    <div id="glass-card" class="glass-cursor-card">
+        <span class="cursor-text">Analyze</span>
+    </div>
+
+    <script>
+        // 頁面切換控制函數
+        function switchTab(tabId) {
+            // 隱藏所有頁面
+            document.querySelectorAll('.page-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            // 顯示目標頁面
+            const target = document.getElementById(tabId);
+            if (target) {
+                target.classList.add('active');
+                gsap.fromTo(target, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 });
+            }
+
+            // 更新頂部導覽列按鈕樣式
+            const btnScout = document.getElementById('nav-scout');
+            const btnRoster = document.getElementById('nav-roster');
+            
+            if (tabId === 'scout-page') {
+                btnScout.className = "text-lg font-bold text-[#005A9C] transition-colors border-b-2 border-[#005A9C] pb-1";
+                btnRoster.className = "text-lg font-bold text-white/70 hover:text-white transition-colors border-b-2 border-transparent pb-1";
+            } else {
+                btnRoster.className = "text-lg font-bold text-[#005A9C] transition-colors border-b-2 border-[#005A9C] pb-1";
+                btnScout.className = "text-lg font-bold text-white/70 hover:text-white transition-colors border-b-2 border-transparent pb-1";
+            }
+        }
+
+        // 串接 API 抓取數據
+        async function fetchScoutData(playerName) {
+            try {
+                gsap.to("#scout-card", { opacity: 0, y: 15, duration: 0.2 });
+                document.getElementById('player-info').innerText = "Querying Statcast... ⏳";
+                ['stat-xwoba', 'stat-xba', 'stat-ev', 'stat-hardhit'].forEach(id => document.getElementById(id).innerText = "-");
+
+                let response = await fetch(`http://127.0.0.1:8000/scout-report/${playerName}`);
+                let data = await response.json();
+                
+                if (data.Error || !data.Advanced_Stats) {
+                    document.getElementById('player-info').innerText = data.Error || "❌ 無法獲取資料";
+                } else {
+                    document.getElementById('player-info').innerText = data.Player_Name;
+                    document.getElementById('stat-xwoba').innerText = data.Advanced_Stats.xwOBA;
+                    document.getElementById('stat-xba').innerText = data.Advanced_Stats.xBA;
+                    document.getElementById('stat-ev').innerText = data.Advanced_Stats.Exit_Velocity + " mph";
+                    document.getElementById('stat-hardhit').innerText = data.Advanced_Stats.HardHit_Percent + " %";
+                }
+
+                gsap.to("#scout-card", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.1 });
+
+            } catch (error) {
+                document.getElementById('player-info').innerText = "⚠️ API 連線失敗！";
+                gsap.to("#scout-card", { opacity: 1, y: 0, duration: 0.5 });
+            }
+        }
+
+        // 綁定搜尋事件
+        document.getElementById('search-btn').addEventListener('click', () => {
+            let name = document.getElementById('search-input').value;
+            if (name) fetchScoutData(name);
+        });
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                let name = document.getElementById('search-input').value;
+                if (name) fetchScoutData(name);
+            }
+        });
+
+        // 頁面載入時預設查詢大谷
+        window.onload = () => fetchScoutData("Shohei Ohtani");
+
+        // 游標跟隨
+        const glassCard = document.getElementById('glass-card');
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX; mouseY = e.clientY;
+            glassCard.classList.add('active');
+            glassCard.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+        });
+    </script>
+</body>
+</html>
