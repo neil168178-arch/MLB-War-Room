@@ -11,167 +11,225 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background-color: #000000; min-height: 100vh; overflow: hidden; font-family: 'Outfit', sans-serif; }
 
-        /* 背景影片 */
         .video-container { position: fixed; bottom: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
         #bg-video { width: 100%; height: 100%; object-fit: cover; opacity: 0.35; }
 
-        /* 道奇藍發光游標 */
         .glass-cursor-card { position: fixed; z-index: 99999; pointer-events: none; padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; transform: translate(-50%, -50%) scale(0); opacity: 0; transition: opacity 0.3s ease; }
         .glass-cursor-card.active { opacity: 1; }
         .cursor-text { font-size: 0.75rem; font-weight: 700; color: #005A9C; text-transform: uppercase; text-shadow: 0 0 5px #005A9C; }
         
-        /* 頁面切換控制：預設隱藏，加上 active 才會顯示 */
         .page-section { display: none; opacity: 0; }
         .page-section.active { display: flex; opacity: 1; }
+
+        /* 捲軸美化 */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 90, 156, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 90, 156, 0.8); }
     </style>
 </head>
 <body class="text-white">
 
     <div class="video-container">
-        <video autoplay muted playsinline loop id="bg-video">
-            <source src="bg.mp4" type="video/mp4">
-        </video>
+        <video autoplay muted playsinline loop id="bg-video"><source src="bg.mp4" type="video/mp4"></video>
     </div>
 
     <header class="w-full p-6 flex justify-between items-center bg-black/40 backdrop-blur-md border-b border-white/10 relative z-10">
-        <div class="text-2xl font-black tracking-widest text-[#005A9C] drop-shadow-[0_0_10px_rgba(0,90,156,0.8)]">
-            WAR ROOM
-        </div>
+        <div class="text-2xl font-black tracking-widest text-[#005A9C] drop-shadow-[0_0_10px_rgba(0,90,156,0.8)]">WAR ROOM</div>
         <nav class="flex gap-8">
-            <button id="nav-scout" onclick="switchTab('scout-page')" class="text-lg font-bold text-[#005A9C] transition-colors border-b-2 border-[#005A9C] pb-1">Scout 雷達</button>
-            <button id="nav-roster" onclick="switchTab('roster-page')" class="text-lg font-bold text-white/70 hover:text-white transition-colors border-b-2 border-transparent pb-1">Roster 陣容</button>
+            <button id="nav-scout" onclick="switchTab('scout-page')" class="nav-btn text-lg font-bold text-[#005A9C] border-b-2 border-[#005A9C] pb-1 transition-colors">Scout 雷達</button>
+            <button id="nav-roster" onclick="switchTab('roster-page')" class="nav-btn text-lg font-bold text-white/70 border-b-2 border-transparent pb-1 hover:text-white transition-colors">Roster 陣容</button>
+            <button id="nav-league" onclick="switchTab('league-page')" class="nav-btn text-lg font-bold text-white/70 border-b-2 border-transparent pb-1 hover:text-white transition-colors">League 全聯盟數據</button>
         </nav>
     </header>
 
     <main id="scout-page" class="page-section active flex-col items-center pt-10 w-full max-w-4xl mx-auto px-4 relative z-10">
         <h1 class="text-4xl font-bold mb-8 text-center text-white/90">Advanced Scouting Radar</h1>
-        
         <div class="flex flex-col md:flex-row gap-4 w-full mb-8">
-            <input type="text" id="search-input" placeholder="輸入球員姓名 (例: Aaron Judge)" 
-                   class="w-full px-6 py-4 rounded-xl bg-black/50 border border-[#005A9C]/50 text-white backdrop-blur-lg focus:outline-none focus:ring-2 focus:ring-[#005A9C] text-lg">
-            <button id="search-btn" class="bg-[#005A9C] hover:bg-[#004A80] text-white font-bold py-4 px-10 rounded-xl transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,90,156,0.5)]">
-                Scan 📡
-            </button>
+            <input type="text" id="search-input" placeholder="輸入球員姓名 (例: Aaron Judge)" class="w-full px-6 py-4 rounded-xl bg-black/50 border border-[#005A9C]/50 text-white backdrop-blur-lg focus:outline-none focus:ring-2 focus:ring-[#005A9C] text-lg">
+            <button id="search-btn" class="bg-[#005A9C] hover:bg-[#004A80] text-white font-bold py-4 px-10 rounded-xl transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,90,156,0.5)]">Scan 📡</button>
         </div>
-
         <div id="scout-card" class="w-full bg-black/60 border border-white/10 p-8 rounded-2xl backdrop-blur-xl shadow-2xl transform translate-y-10 opacity-0 relative overflow-hidden">
-            <div class="absolute -top-20 -right-20 w-64 h-64 bg-[#005A9C] rounded-full blur-[100px] opacity-30"></div>
-            
             <h2 class="text-sm font-bold text-[#005A9C] mb-1 uppercase tracking-widest">Player Profile</h2>
             <div id="player-info" class="text-4xl font-black text-white mb-6">等待雷達掃描...</div>
-            
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white/5 border border-white/10 p-4 rounded-lg">
-                    <div class="text-xs text-gray-400 mb-1">預期加權上壘率 (xwOBA)</div>
-                    <div id="stat-xwoba" class="text-2xl font-bold text-white">-</div>
-                </div>
-                <div class="bg-white/5 border border-white/10 p-4 rounded-lg">
-                    <div class="text-xs text-gray-400 mb-1">預期打擊率 (xBA)</div>
-                    <div id="stat-xba" class="text-2xl font-bold text-white">-</div>
-                </div>
-                <div class="bg-white/5 border border-white/10 p-4 rounded-lg">
-                    <div class="text-xs text-gray-400 mb-1">平均擊球初速 (Exit Velocity)</div>
-                    <div id="stat-ev" class="text-2xl font-bold text-white">-</div>
-                </div>
-                <div class="bg-white/5 border border-white/10 p-4 rounded-lg">
-                    <div class="text-xs text-gray-400 mb-1">強擊球比例 (HardHit%)</div>
-                    <div id="stat-hardhit" class="text-2xl font-bold text-[#005A9C] drop-shadow-[0_0_8px_rgba(0,90,156,0.8)]">-</div>
-                </div>
+                <div class="bg-white/5 border border-white/10 p-4 rounded-lg"><div class="text-xs text-gray-400 mb-1">xwOBA</div><div id="stat-xwoba" class="text-2xl font-bold text-white">-</div></div>
+                <div class="bg-white/5 border border-white/10 p-4 rounded-lg"><div class="text-xs text-gray-400 mb-1">xBA</div><div id="stat-xba" class="text-2xl font-bold text-white">-</div></div>
+                <div class="bg-white/5 border border-white/10 p-4 rounded-lg"><div class="text-xs text-gray-400 mb-1">Exit Velocity</div><div id="stat-ev" class="text-2xl font-bold text-white">-</div></div>
+                <div class="bg-white/5 border border-white/10 p-4 rounded-lg"><div class="text-xs text-gray-400 mb-1">HardHit%</div><div id="stat-hardhit" class="text-2xl font-bold text-[#005A9C] drop-shadow-[0_0_8px_rgba(0,90,156,0.8)]">-</div></div>
             </div>
         </div>
     </main>
 
-    <main id="roster-page" class="page-section flex-col items-center pt-10 w-full max-w-4xl mx-auto px-4 relative z-10">
-        <h1 class="text-4xl font-bold mb-8 text-center text-white/90">My Team Roster</h1>
-        <div class="w-full bg-black/60 border border-white/10 p-10 rounded-2xl backdrop-blur-xl shadow-2xl text-center">
-            <div class="text-6xl mb-4">🏟️</div>
-            <h2 class="text-2xl font-bold text-white mb-2">陣容頁面建設中</h2>
-            <p class="text-gray-400">總教練，這裡未來將接入我們在 fantasy_team.py 寫好的「跨日調度陣容名單」！</p>
+    <main id="roster-page" class="page-section flex-col items-center pt-10 w-full max-w-4xl mx-auto px-4 relative z-10 h-[80vh] overflow-y-auto pb-20">
+        <h1 class="text-4xl font-bold mb-4 text-center text-white/90">My Team Roster</h1>
+        <p id="manager-info" class="text-[#005A9C] font-bold tracking-widest mb-8 text-center uppercase">連線中...</p>
+        <div id="roster-container" class="w-full opacity-0 transform translate-y-10">
+            <div class="bg-black/60 border border-[#005A9C]/50 p-6 rounded-2xl mb-6 shadow-[0_0_30px_rgba(0,90,156,0.2)]">
+                <h2 class="text-xl font-bold text-white mb-4 border-b border-[#005A9C]/30 pb-2">Starters 先發名單</h2>
+                <div id="starters-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            </div>
+            <div class="bg-black/80 border border-gray-700 p-6 rounded-2xl mb-10">
+                <h2 class="text-xl font-bold text-gray-400 mb-4 border-b border-gray-700 pb-2">Bench / IL 板凳與傷兵</h2>
+                <div id="bench-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            </div>
         </div>
     </main>
 
-    <div id="glass-card" class="glass-cursor-card">
-        <span class="cursor-text">Analyze</span>
-    </div>
+    <main id="league-page" class="page-section flex-col items-center pt-10 w-full max-w-5xl mx-auto px-4 relative z-10 h-[80vh] overflow-y-auto pb-20">
+        <h1 class="text-4xl font-bold mb-6 text-center text-white/90">Statcast League Leaders</h1>
+        
+        <div class="w-full bg-black/40 border border-white/10 p-4 rounded-xl backdrop-blur-md mb-6 flex flex-wrap gap-4 items-end justify-center shadow-[0_0_15px_rgba(0,90,156,0.3)]">
+            <div class="flex flex-col">
+                <label class="text-xs text-[#005A9C] font-bold uppercase tracking-wider mb-1">Season (賽季)</label>
+                <select id="filter-year" class="bg-black/60 border border-[#005A9C]/50 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-[#005A9C]">
+                    <option value="2026"selected>2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                </select>
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs text-[#005A9C] font-bold uppercase tracking-wider mb-1">Min PA (最低打席)</label>
+                <input type="number" id="filter-pa" value="400" step="50" class="bg-black/60 border border-[#005A9C]/50 text-white rounded-lg px-4 py-2 w-28 outline-none focus:ring-2 focus:ring-[#005A9C]">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs text-[#005A9C] font-bold uppercase tracking-wider mb-1">Sort By (排序依據)</label>
+                <select id="filter-sort" class="bg-black/60 border border-[#005A9C]/50 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-[#005A9C]">
+                    <option value="est_woba" selected>xwOBA (預期加權上壘率)</option>
+                    <option value="est_ba">xBA (預期打擊率)</option>
+                    <option value="est_slg">xSLG (預期長打率)</option>
+                </select>
+            </div>
+            <button onclick="fetchLeagueData()" class="bg-[#005A9C] hover:bg-[#004A80] text-white font-bold py-2 px-8 rounded-lg transition-transform hover:scale-105 shadow-[0_0_10px_rgba(0,90,156,0.5)]">
+                更新榜單 🔄
+            </button>
+        </div>
+        
+        <div class="w-full bg-black/60 border border-[#005A9C]/50 p-6 rounded-2xl backdrop-blur-xl shadow-[0_0_30px_rgba(0,90,156,0.2)]">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-[#005A9C]/50 text-[#005A9C] text-sm uppercase tracking-widest">
+                            <th class="p-4">Rank</th>
+                            <th class="p-4">Player</th>
+                            <th class="p-4">PA (打席)</th>
+                            <th class="p-4 text-white">xwOBA 👑</th>
+                            <th class="p-4">xBA</th>
+                            <th class="p-4">xSLG</th>
+                        </tr>
+                    </thead>
+                    <tbody id="league-table-body" class="text-gray-200">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="glass-card" class="glass-cursor-card"><span class="cursor-text">Analyze</span></div>
 
     <script>
-        // 頁面切換控制函數
+        // --- Tab 頁面切換控制 ---
         function switchTab(tabId) {
-            // 隱藏所有頁面
-            document.querySelectorAll('.page-section').forEach(el => {
-                el.classList.remove('active');
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn text-lg font-bold text-white/70 border-b-2 border-transparent pb-1 hover:text-white transition-colors";
             });
-            // 顯示目標頁面
+
             const target = document.getElementById(tabId);
+            const targetBtn = document.getElementById(`nav-${tabId.split('-')[0]}`);
             if (target) {
                 target.classList.add('active');
+                targetBtn.className = "nav-btn text-lg font-bold text-[#005A9C] border-b-2 border-[#005A9C] pb-1 transition-colors";
                 gsap.fromTo(target, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 });
-            }
-
-            // 更新頂部導覽列按鈕樣式
-            const btnScout = document.getElementById('nav-scout');
-            const btnRoster = document.getElementById('nav-roster');
-            
-            if (tabId === 'scout-page') {
-                btnScout.className = "text-lg font-bold text-[#005A9C] transition-colors border-b-2 border-[#005A9C] pb-1";
-                btnRoster.className = "text-lg font-bold text-white/70 hover:text-white transition-colors border-b-2 border-transparent pb-1";
-            } else {
-                btnRoster.className = "text-lg font-bold text-[#005A9C] transition-colors border-b-2 border-[#005A9C] pb-1";
-                btnScout.className = "text-lg font-bold text-white/70 hover:text-white transition-colors border-b-2 border-transparent pb-1";
+                
+                if (tabId === 'roster-page') fetchRosterData();
+                if (tabId === 'league-page') fetchLeagueData();
             }
         }
 
-        // 串接 API 抓取數據
+        // --- 📊 API: 動態抓取全聯盟打擊排行榜 ---
+        async function fetchLeagueData() {
+            const tableBody = document.getElementById('league-table-body');
+            const year = document.getElementById('filter-year').value;
+            const minPa = document.getElementById('filter-pa').value;
+            const sortBy = document.getElementById('filter-sort').value;
+
+            try {
+                tableBody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-[#005A9C] font-bold text-xl animate-pulse">📡 正在解析 ${year} 年大聯盟 Statcast 數據...</td></tr>`;
+                
+                const apiUrl = `http://127.0.0.1:8000/league-stats?year=${year}&min_pa=${minPa}&sort_by=${sortBy}`;
+                let response = await fetch(apiUrl);
+                let resData = await response.json();
+
+                if (resData.status === "success") {
+                    let html = '';
+                    resData.data.forEach((player, index) => {
+                        const hl_xwoba = sortBy === 'est_woba' ? 'text-[#005A9C] text-2xl font-black drop-shadow-[0_0_8px_rgba(0,90,156,0.8)]' : 'text-gray-300';
+                        const hl_xba = sortBy === 'est_ba' ? 'text-[#005A9C] text-2xl font-black drop-shadow-[0_0_8px_rgba(0,90,156,0.8)]' : 'text-gray-300';
+                        const hl_xslg = sortBy === 'est_slg' ? 'text-[#005A9C] text-2xl font-black drop-shadow-[0_0_8px_rgba(0,90,156,0.8)]' : 'text-gray-300 font-bold';
+
+                        html += `
+                        <tr class="border-b border-white/5 hover:bg-[#005A9C]/20 transition-colors">
+                            <td class="p-4 font-bold text-gray-400">#${index + 1}</td>
+                            <td class="p-4 font-bold text-white text-lg">${player.Name}</td>
+                            <td class="p-4 text-gray-300">${player.PA}</td>
+                            <td class="p-4 ${hl_xwoba}">${player.xwOBA.toFixed(3)}</td>
+                            <td class="p-4 ${hl_xba}">${player.xBA.toFixed(3)}</td>
+                            <td class="p-4 ${hl_xslg}">${player.xSLG.toFixed(3)}</td>
+                        </tr>
+                        `;
+                    });
+                    tableBody.innerHTML = html;
+                    gsap.from("#league-table-body tr", { opacity: 0, y: 10, stagger: 0.02, duration: 0.3 });
+                } else {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-red-400">❌ 錯誤: ${resData.message}</td></tr>`;
+                }
+            } catch (error) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-red-400">⚠️ API 連線失敗，請檢查 FastAPI。</td></tr>`;
+            }
+        }
+
+        // --- Scout 與 Roster API ---
+        async function fetchRosterData() {
+            try {
+                let response = await fetch("http://127.0.0.1:8000/roster");
+                let data = await response.json();
+                document.getElementById('manager-info').innerText = `${data.team_name} | Manager: ${data.manager}`;
+                const startersList = document.getElementById('starters-list'); const benchList = document.getElementById('bench-list');
+                startersList.innerHTML = ''; benchList.innerHTML = '';
+                data.starters.forEach(p => { startersList.innerHTML += `<div class="flex items-center justify-between bg-white/5 border border-[#005A9C]/30 p-3 rounded-lg"><div class="flex items-center gap-3"><span class="bg-[#005A9C] text-white text-xs font-bold px-2 py-1 rounded w-10 text-center">${p.position}</span><span class="text-lg font-medium text-white">${p.name}</span></div><span class="text-xs text-green-400 font-bold border border-green-400/30 px-2 py-1 rounded bg-green-400/10">${p.status}</span></div>`; });
+                data.bench.forEach(p => { let isIL = p.status.includes('IL'); let c1 = isIL ? 'text-red-400 border-red-400/30 bg-red-400/10' : 'text-gray-400 border-gray-400/30 bg-gray-400/10'; let c2 = isIL ? 'bg-red-900/50 text-red-200' : 'bg-gray-700 text-white'; benchList.innerHTML += `<div class="flex items-center justify-between bg-black/40 border border-white/5 p-3 rounded-lg"><div class="flex items-center gap-3"><span class="${c2} text-xs font-bold px-2 py-1 rounded w-10 text-center">${p.position}</span><span class="text-lg font-medium text-gray-300">${p.name}</span></div><span class="text-xs font-bold border px-2 py-1 rounded ${c1}">${p.status}</span></div>`; });
+                gsap.to("#roster-container", { opacity: 1, y: 0, duration: 0.8 });
+            } catch (error) {}
+        }
+
         async function fetchScoutData(playerName) {
             try {
                 gsap.to("#scout-card", { opacity: 0, y: 15, duration: 0.2 });
                 document.getElementById('player-info').innerText = "Querying Statcast... ⏳";
-                ['stat-xwoba', 'stat-xba', 'stat-ev', 'stat-hardhit'].forEach(id => document.getElementById(id).innerText = "-");
-
-                let response = await fetch(`http://127.0.0.1:8000/scout-report/${playerName}`);
-                let data = await response.json();
-                
-                if (data.Error || !data.Advanced_Stats) {
-                    document.getElementById('player-info').innerText = data.Error || "❌ 無法獲取資料";
-                } else {
+                let response = await fetch(`http://127.0.0.1:8000/scout-report/${playerName}`); let data = await response.json();
+                if (data.Error) { document.getElementById('player-info').innerText = data.Error; } 
+                else {
                     document.getElementById('player-info').innerText = data.Player_Name;
                     document.getElementById('stat-xwoba').innerText = data.Advanced_Stats.xwOBA;
                     document.getElementById('stat-xba').innerText = data.Advanced_Stats.xBA;
                     document.getElementById('stat-ev').innerText = data.Advanced_Stats.Exit_Velocity + " mph";
                     document.getElementById('stat-hardhit').innerText = data.Advanced_Stats.HardHit_Percent + " %";
                 }
-
                 gsap.to("#scout-card", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.1 });
-
-            } catch (error) {
-                document.getElementById('player-info').innerText = "⚠️ API 連線失敗！";
-                gsap.to("#scout-card", { opacity: 1, y: 0, duration: 0.5 });
-            }
+            } catch (error) {}
         }
 
-        // 綁定搜尋事件
-        document.getElementById('search-btn').addEventListener('click', () => {
-            let name = document.getElementById('search-input').value;
-            if (name) fetchScoutData(name);
-        });
-        document.getElementById('search-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                let name = document.getElementById('search-input').value;
-                if (name) fetchScoutData(name);
-            }
-        });
-
-        // 頁面載入時預設查詢大谷
+        document.getElementById('search-btn').addEventListener('click', () => { let n = document.getElementById('search-input').value; if(n) fetchScoutData(n); });
+        document.getElementById('search-input').addEventListener('keypress', (e) => { if(e.key==='Enter'){ let n = document.getElementById('search-input').value; if(n) fetchScoutData(n); } });
         window.onload = () => fetchScoutData("Shohei Ohtani");
 
-        // 游標跟隨
+        // 游標
         const glassCard = document.getElementById('glass-card');
-        let mouseX = 0, mouseY = 0;
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX; mouseY = e.clientY;
-            glassCard.classList.add('active');
-            glassCard.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
-        });
+        document.addEventListener('mousemove', (e) => { glassCard.classList.add('active'); glassCard.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`; });
     </script>
 </body>
 </html>
