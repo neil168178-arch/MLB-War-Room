@@ -1,7 +1,7 @@
 let GLOBAL_DATA = [];
 // 💡 自動偵測環境：如果在本地開發就連 127.0.0.1，如果在雲端就連未來的雲端後端網址
 const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
-const API_BASE_URL = isLocal ? "http://127.0.0.1:8000" : "https://您的未來後端網址.onrender.com"; 
+const API_BASE_URL = isLocal ? "http://127.0.0.1:8000" : "https://mlb-war-room-l7ps.onrender.com"; 
 // (網址我們先這樣寫，等下 Render 部署完會給我們真實網址，再來換掉)
 let AI_RECOMMENDED_PLAYERS = []; // 💡 用來記住 AI 推薦了誰
 let myRadarChart = null, myScatterChart = null;
