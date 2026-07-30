@@ -22,12 +22,13 @@ class UpdatePlayerRequest(BaseModel):
     real_pts: Optional[float] = None
 app = FastAPI()
 
+# 💡 終極跨域通行證：允許任何網頁 (包含 Vercel) 來要資料
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # 允許所有來源
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # 允許所有方法 (GET, POST 等)
+    allow_headers=["*"],  # 允許所有標頭
 )
 # ==========================================
 # ⚾ 棒球專屬：MLB 局數 (IP) 統一解析引擎
