@@ -92,7 +92,7 @@ window.updateRealPts = async function(name, newPts) {
     try {
         let pts = parseFloat(newPts);
         if (isNaN(pts)) pts = 0.0;
-        await fetch("${API_BASE_URL}/fantasy/update-player", {
+        await fetch(API_BASE_URL + "/fantasy/update-player", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: name, real_pts: pts })
         });
@@ -717,7 +717,7 @@ async function manualAddPlayer() {
 
 async function addPlayerToMyTeam(name, team = "FA", pos = "UTIL") {
     try {
-        let res = await fetch("${API_BASE_URL}/fantasy/add-player", {
+        let res = await fetch(API_BASE_URL + "/fantasy/add-player", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: name, team: team, pos: pos })
         });
@@ -730,7 +730,7 @@ async function addPlayerToMyTeam(name, team = "FA", pos = "UTIL") {
 async function dropPlayer(name) {
     if (!confirm(`確定要釋出 ${name} 嗎？`)) return;
     try {
-        let res = await fetch("${API_BASE_URL}/fantasy/drop-player", {
+        let res = await fetch(API_BASE_URL + "/fantasy/drop-player", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: name })
         });
@@ -874,7 +874,7 @@ window.ignorePlayerInMarket = async function(name, currentType) {
     if(!confirm(`確定要將 【${name}】 從自由市場中永久去除嗎？\n(這通常代表該球員已經在您的真實 Yahoo 聯盟中被其他玩家選走了)`)) return;
     
     try {
-        let res = await fetch("${API_BASE_URL}/fantasy/ignore-player", {
+        let res = await fetch(API_BASE_URL + "/fantasy/ignore-player", {
             method: "POST", headers: {"Content-Type": "application/json"},
             body: JSON.stringify({name: name})
         });
@@ -939,7 +939,7 @@ async function executeTradeAnalysis() {
     resultBox.innerHTML = `<div class="text-[#005A9C] font-black text-3xl animate-pulse text-center py-10">🧠 AI 總管正在分析龐大交易數據庫...</div>`;
     
     try {
-        let res = await fetch('${API_BASE_URL}/fantasy/trade-analyzer', {
+        let res = await fetch(API_BASE_URL + "/fantasy/trade-analyzer", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ give_players: givePlayers, receive_players: recPlayers })
@@ -2540,7 +2540,7 @@ async function createNewLeagueOrTeam() {
         const tName = prompt("請為您的新球隊命名：");
         const currentL = document.getElementById('fan-league-select').value;
         if(tName && tName.trim()) {
-            await fetch("${API_BASE_URL}/fantasy/switch-context", {
+            await fetch(API_BASE_URL + "/fantasy/switch-context", {
                 method: "POST", headers: {"Content-Type":"application/json"},
                 body: JSON.stringify({league: currentL, team: tName.trim()})
             });
@@ -2551,7 +2551,7 @@ async function createNewLeagueOrTeam() {
 // ⚡ 一鍵簽下 AI 推薦球員
 async function quickAddPlayer(name, team, pos) {
     try {
-        let res = await fetch("${API_BASE_URL}/fantasy/add-player", {
+        let res = await fetch(API_BASE_URL + "/fantasy/add-player", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({ name: name, team: team, pos: pos })
