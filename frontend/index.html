@@ -6,6 +6,7 @@
     <title>Dodgers Data Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -21,11 +22,17 @@
         .page-section { display: none; opacity: 0; }
         .page-section.active { display: flex; opacity: 1; }
 
-        /* 捲軸美化 */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
-        ::-webkit-scrollbar-thumb { background: rgba(0, 90, 156, 0.5); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 90, 156, 0.8); }
+        #league-table-scroll::-webkit-scrollbar { display: none; }
+        #league-table-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        #league-top-scroll::-webkit-scrollbar { height: 12px; }
+        #league-top-scroll::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 6px; }
+        #league-top-scroll::-webkit-scrollbar-thumb { background: rgba(0, 90, 156, 0.8); border-radius: 6px; }
+        #league-top-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0, 90, 156, 1); }
+
+        .sub-view { display: none; }
+        .sub-view.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="text-white">
@@ -34,202 +41,396 @@
         <video autoplay muted playsinline loop id="bg-video"><source src="bg.mp4" type="video/mp4"></video>
     </div>
 
-    <header class="w-full p-6 flex justify-between items-center bg-black/40 backdrop-blur-md border-b border-white/10 relative z-10">
-        <div class="text-2xl font-black tracking-widest text-[#005A9C] drop-shadow-[0_0_10px_rgba(0,90,156,0.8)]">WAR ROOM</div>
+    <header class="w-full p-6 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-gray-200/50 relative z-10 shadow-sm">
+        <div class="text-2xl font-black tracking-widest text-[#005A9C]">WAR ROOM</div>
         <nav class="flex gap-8">
-            <button id="nav-scout" onclick="switchTab('scout-page')" class="nav-btn text-lg font-bold text-[#005A9C] border-b-2 border-[#005A9C] pb-1 transition-colors">Scout 雷達</button>
-            <button id="nav-roster" onclick="switchTab('roster-page')" class="nav-btn text-lg font-bold text-white/70 border-b-2 border-transparent pb-1 hover:text-white transition-colors">Roster 陣容</button>
-            <button id="nav-league" onclick="switchTab('league-page')" class="nav-btn text-lg font-bold text-white/70 border-b-2 border-transparent pb-1 hover:text-white transition-colors">League 全聯盟數據</button>
+            <button id="nav-scout" onclick="switchTab('scout-page')" class="nav-btn text-lg font-bold text-[#005A9C] opacity-100 border-b-2 border-[#005A9C] pb-1 transition-all">Search 深度搜尋</button>
+            <button id="nav-team" onclick="switchTab('team-page')" class="nav-btn text-lg font-bold text-[#005A9C] opacity-60 border-b-2 border-transparent pb-1 hover:opacity-100 transition-all">Team 球隊戰情</button>
+            <button id="nav-predict" onclick="switchTab('predict-page')" class="nav-btn text-lg font-bold text-[#005A9C] opacity-60 border-b-2 border-transparent pb-1 hover:opacity-100 transition-all">Predictions 預測</button>
+            <button id="nav-fantasy" onclick="switchTab('fantasy-page')" class="nav-btn text-lg font-bold text-[#005A9C] opacity-60 border-b-2 border-transparent pb-1 hover:opacity-100 transition-all">Fantasy 夢幻球隊</button>
+            <button id="nav-league" onclick="switchTab('league-page')" class="nav-btn text-lg font-bold text-[#005A9C] opacity-60 border-b-2 border-transparent pb-1 hover:opacity-100 transition-all">League 全聯盟數據</button>
         </nav>
     </header>
 
-    <main id="scout-page" class="page-section active flex-col items-center pt-10 w-full max-w-4xl mx-auto px-4 relative z-10">
-        <h1 class="text-4xl font-bold mb-8 text-center text-white/90">Advanced Scouting Radar</h1>
-        <div class="flex flex-col md:flex-row gap-4 w-full mb-8">
-            <input type="text" id="search-input" placeholder="輸入球員姓名 (例: Aaron Judge)" class="w-full px-6 py-4 rounded-xl bg-black/50 border border-[#005A9C]/50 text-white backdrop-blur-lg focus:outline-none focus:ring-2 focus:ring-[#005A9C] text-lg">
-            <button id="search-btn" class="bg-[#005A9C] hover:bg-[#004A80] text-white font-bold py-4 px-10 rounded-xl transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,90,156,0.5)]">Scan 📡</button>
-        </div>
-        <div id="scout-card" class="w-full bg-black/60 border border-white/10 p-8 rounded-2xl backdrop-blur-xl shadow-2xl transform translate-y-10 opacity-0 relative overflow-hidden">
-            <h2 class="text-sm font-bold text-[#005A9C] mb-1 uppercase tracking-widest">Player Profile</h2>
-            <div id="player-info" class="text-4xl font-black text-white mb-6">等待雷達掃描...</div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white/5 border border-white/10 p-4 rounded-lg"><div class="text-xs text-gray-400 mb-1">xwOBA</div><div id="stat-xwoba" class="text-2xl font-bold text-white">-</div></div>
-                <div class="bg-white/5 border border-white/10 p-4 rounded-lg"><div class="text-xs text-gray-400 mb-1">xBA</div><div id="stat-xba" class="text-2xl font-bold text-white">-</div></div>
-                <div class="bg-white/5 border border-white/10 p-4 rounded-lg"><div class="text-xs text-gray-400 mb-1">Exit Velocity</div><div id="stat-ev" class="text-2xl font-bold text-white">-</div></div>
-                <div class="bg-white/5 border border-white/10 p-4 rounded-lg"><div class="text-xs text-gray-400 mb-1">HardHit%</div><div id="stat-hardhit" class="text-2xl font-bold text-[#005A9C] drop-shadow-[0_0_8px_rgba(0,90,156,0.8)]">-</div></div>
-            </div>
-        </div>
-    </main>
-
-    <main id="roster-page" class="page-section flex-col items-center pt-10 w-full max-w-4xl mx-auto px-4 relative z-10 h-[80vh] overflow-y-auto pb-20">
-        <h1 class="text-4xl font-bold mb-4 text-center text-white/90">My Team Roster</h1>
-        <p id="manager-info" class="text-[#005A9C] font-bold tracking-widest mb-8 text-center uppercase">連線中...</p>
-        <div id="roster-container" class="w-full opacity-0 transform translate-y-10">
-            <div class="bg-black/60 border border-[#005A9C]/50 p-6 rounded-2xl mb-6 shadow-[0_0_30px_rgba(0,90,156,0.2)]">
-                <h2 class="text-xl font-bold text-white mb-4 border-b border-[#005A9C]/30 pb-2">Starters 先發名單</h2>
-                <div id="starters-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-            </div>
-            <div class="bg-black/80 border border-gray-700 p-6 rounded-2xl mb-10">
-                <h2 class="text-xl font-bold text-gray-400 mb-4 border-b border-gray-700 pb-2">Bench / IL 板凳與傷兵</h2>
-                <div id="bench-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-            </div>
-        </div>
-    </main>
-
-    <main id="league-page" class="page-section flex-col items-center pt-10 w-full max-w-5xl mx-auto px-4 relative z-10 h-[80vh] overflow-y-auto pb-20">
-        <h1 class="text-4xl font-bold mb-6 text-center text-white/90">Statcast League Leaders</h1>
+    <main id="scout-page" class="page-section flex-col items-center pt-6 w-full relative z-10 h-[91vh] overflow-y-auto px-2 md:px-4 pb-6">
+        <h1 class="text-4xl font-black mb-8 text-center text-[#005A9C] tracking-wide">Player Deep Search</h1>
         
-        <div class="w-full bg-black/40 border border-white/10 p-4 rounded-xl backdrop-blur-md mb-6 flex flex-wrap gap-4 items-end justify-center shadow-[0_0_15px_rgba(0,90,156,0.3)]">
-            <div class="flex flex-col">
-                <label class="text-xs text-[#005A9C] font-bold uppercase tracking-wider mb-1">Season (賽季)</label>
-                <select id="filter-year" class="bg-black/60 border border-[#005A9C]/50 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-[#005A9C]">
-                    <option value="2026"selected>2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
-                    <option value="2023">2023</option>
-                    <option value="2022">2022</option>
-                    <option value="2021">2021</option>
-                </select>
+        <div class="flex flex-col md:flex-row gap-4 w-full max-w-3xl mx-auto mb-8">
+            <div class="relative w-full">
+                <input list="player-datalist" type="text" id="deep-search-input" autocomplete="off" placeholder="輸入球員姓名 (支援下拉選單自動完成)..." class="w-full px-6 py-4 rounded-xl bg-white border border-[#005A9C] text-gray-900 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-200 text-lg font-bold transition-all relative z-20 text-center md:text-left">
             </div>
-            <div class="flex flex-col">
-                <label class="text-xs text-[#005A9C] font-bold uppercase tracking-wider mb-1">Min PA (最低打席)</label>
-                <input type="number" id="filter-pa" value="400" step="50" class="bg-black/60 border border-[#005A9C]/50 text-white rounded-lg px-4 py-2 w-28 outline-none focus:ring-2 focus:ring-[#005A9C]">
-            </div>
-            <div class="flex flex-col">
-                <label class="text-xs text-[#005A9C] font-bold uppercase tracking-wider mb-1">Sort By (排序依據)</label>
-                <select id="filter-sort" class="bg-black/60 border border-[#005A9C]/50 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-[#005A9C]">
-                    <option value="est_woba" selected>xwOBA (預期加權上壘率)</option>
-                    <option value="est_ba">xBA (預期打擊率)</option>
-                    <option value="est_slg">xSLG (預期長打率)</option>
-                </select>
-            </div>
-            <button onclick="fetchLeagueData()" class="bg-[#005A9C] hover:bg-[#004A80] text-white font-bold py-2 px-8 rounded-lg transition-transform hover:scale-105 shadow-[0_0_10px_rgba(0,90,156,0.5)]">
-                更新榜單 🔄
+            <button onclick="executeDeepSearch()" class="bg-[#005A9C] hover:bg-[#004A80] text-white font-black text-xl py-4 px-10 rounded-xl transition-transform hover:scale-105 shadow-md shrink-0 z-10 flex items-center justify-center gap-2">
+                搜尋 🔍
             </button>
         </div>
+
+        <div id="deep-search-results" class="w-full bg-white/95 border border-gray-200 p-6 rounded-2xl shadow-xl hidden">
+            <div class="flex flex-col md:flex-row items-center gap-6 border-b-2 border-[#005A9C] pb-6 mb-6">
+                <div id="ds-pos" class="flex flex-wrap gap-3 justify-center md:justify-start"></div>
+                <div class="text-center md:text-left">
+                    <h2 class="text-4xl font-black text-gray-900" id="ds-name">球員姓名</h2>
+                    <p class="text-lg font-bold text-gray-500 mt-1" id="ds-bio">年齡 | 身高 | 體重 | 投打習慣</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 mb-6 border-b border-gray-200 pb-4 overflow-x-auto whitespace-nowrap">
+                <button onclick="switchDSTab('ds-tab-basic')" id="btn-ds-tab-basic" class="ds-tab-btn px-4 py-2 bg-[#005A9C] text-white font-bold rounded-lg shadow-sm">🔍 基本與進階</button>
+                <button onclick="switchDSTab('ds-tab-platoon')" id="btn-ds-tab-platoon" class="ds-tab-btn px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 font-bold rounded-lg transition-colors">⚔️ 左右對戰</button>
+                <button onclick="switchDSTab('ds-tab-splits')" id="btn-ds-tab-splits" class="ds-tab-btn px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 font-bold rounded-lg transition-colors">🏠 主客場</button>
+                <button onclick="switchDSTab('ds-tab-career')" id="btn-ds-tab-career" class="ds-tab-btn px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 font-bold rounded-lg transition-colors">📅 生涯軌跡</button>
+            </div>
+
+            <div id="ds-tab-basic" class="ds-tab-content block">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 border border-gray-200 p-5 rounded-xl">
+                        <h3 class="text-xl font-bold text-[#005A9C] mb-4 border-b-2 border-gray-200 pb-2">傳統與進階數據</h3>
+                        <div class="grid grid-cols-2 gap-4" id="ds-stats-grid"></div>
+                    </div>
+                    <div class="bg-gray-50 border border-gray-200 p-5 rounded-xl">
+                        <h3 class="text-xl font-bold text-[#005A9C] mb-4 border-b-2 border-gray-200 pb-2">球探綜合評估 (Percentile Rank)</h3>
+                        <div id="ds-pr-bars" class="mb-6"></div>
+                        <div class="bg-blue-50 border-l-4 border-[#005A9C] p-4 rounded-r-lg text-gray-800 font-medium leading-relaxed">
+                            <span class="font-bold text-[#005A9C] block mb-1">🤖 AI 球探總結：</span>
+                            <span id="ds-scout-text"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ds-tab-platoon" class="ds-tab-content hidden"></div>
+            <div id="ds-tab-splits" class="ds-tab-content hidden"></div>
+            <div id="ds-tab-career" class="ds-tab-content hidden"></div>
+        </div>
+    </main>
+
+    <main id="team-page" class="page-section flex-col items-center pt-6 w-full relative z-10 h-[91vh] overflow-y-auto px-2 md:px-4 pb-6">
+        <h1 class="text-5xl font-black mb-8 text-center text-[#005A9C] tracking-wide">Team Dashboard</h1>
         
-        <div class="w-full bg-black/60 border border-[#005A9C]/50 p-6 rounded-2xl backdrop-blur-xl shadow-[0_0_30px_rgba(0,90,156,0.2)]">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-[#005A9C]/50 text-[#005A9C] text-sm uppercase tracking-widest">
-                            <th class="p-4">Rank</th>
-                            <th class="p-4">Player</th>
-                            <th class="p-4">PA (打席)</th>
-                            <th class="p-4 text-white">xwOBA 👑</th>
-                            <th class="p-4">xBA</th>
-                            <th class="p-4">xSLG</th>
-                        </tr>
-                    </thead>
-                    <tbody id="league-table-body" class="text-gray-200">
-                        </tbody>
-                </table>
+        <div class="w-full flex justify-center items-center mb-8 gap-6 whitespace-nowrap">
+            <select id="team-selector" class="bg-white border-2 border-[#005A9C] text-[#005A9C] text-2xl rounded-xl px-6 py-3 shadow-sm font-black outline-none focus:ring-4 focus:ring-blue-300 cursor-pointer"></select>
+            <button onclick="fetchTeamDashboard()" class="bg-[#005A9C] text-white px-10 py-3 rounded-xl font-black text-2xl hover:scale-105 transition-transform shadow-md whitespace-nowrap">加載戰情室 📊</button>
+        </div>
+
+        <div id="team-dashboard-content" class="w-full hidden"></div>
+    </main>
+
+    <main id="fantasy-page" class="page-section flex-col items-center pt-6 w-full relative z-10 h-[91vh] overflow-y-auto px-2 md:px-4 pb-6">
+    <div class="w-full mx-auto flex flex-col items-center">
+        <div class="flex items-center justify-center gap-4 mb-6">
+            <h1 class="text-5xl font-black text-[#005A9C] tracking-wide">🏆 Fantasy 總管控制台</h1>
+        </div>
+
+        <div class="flex flex-nowrap overflow-x-auto whitespace-nowrap justify-start md:justify-center gap-3 md:gap-4 mb-8 bg-white/90 p-3 rounded-2xl shadow-sm border border-gray-200 w-full max-w-[98vw]">
+            <button onclick="switchFanTab('settings')" id="btn-fan-settings" class="fan-tab-btn shrink-0 text-gray-500 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold text-xl md:text-2xl transition-colors">⚙️ 聯盟設定</button>
+            <button onclick="switchFanTab('my-team')" id="btn-fan-my-team" class="fan-tab-btn shrink-0 bg-[#005A9C] text-white px-6 py-3 rounded-xl font-bold text-xl md:text-2xl shadow-sm">📝 我的球隊</button>
+            <button onclick="switchFanTab('rankings')" id="btn-fan-rankings" class="fan-tab-btn shrink-0 text-gray-500 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold text-xl md:text-2xl transition-colors">📊 數據排行</button>
+            <button onclick="switchFanTab('projections')" id="btn-fan-projections" class="fan-tab-btn shrink-0 text-gray-500 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold text-xl md:text-2xl transition-colors">🔮 未來預期</button>
+            <button onclick="switchFanTab('fa-market')" id="btn-fan-fa-market" class="fan-tab-btn shrink-0 text-gray-500 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold text-xl md:text-2xl transition-colors">🛒 自由市場</button>
+            <button onclick="switchFanTab('trade-analyzer')" id="btn-fan-trade-analyzer" class="fan-tab-btn shrink-0 text-gray-500 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold text-xl md:text-2xl transition-colors">🤝 交易模擬</button>
+            <button onclick="switchFanTab('prospects')" id="btn-fan-prospects" class="fan-tab-btn shrink-0 text-gray-500 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold text-xl md:text-2xl transition-colors">🌟 大物雷達</button>
+        </div>
+
+        <div id="fan-my-team" class="fan-view w-full"></div>
+        <div id="fan-fa-market" class="fan-view w-full hidden"></div>
+        <div id="fan-trade-analyzer" class="fan-view w-full hidden"></div>
+        <div id="fan-prospects" class="fan-view w-full hidden"></div>
+        <div id="fan-projections" class="fan-view w-full hidden"></div>
+        <div id="fan-rankings" class="fan-view w-full hidden"></div>
+        <div id="fan-settings" class="fan-view w-full hidden"></div>
+    </main>
+
+    <main id="league-page" class="page-section flex-col items-center pt-6 w-full relative z-10 h-[91vh] overflow-y-auto px-2 md:px-4 pb-6">
+        
+        <div class="w-full mx-auto flex flex-col items-center">
+            
+            <h1 class="text-4xl font-black mb-6 text-center text-[#005A9C] tracking-wide">MLB Official League Leaders</h1>
+            
+            <div class="flex flex-nowrap overflow-x-auto whitespace-nowrap justify-start md:justify-center gap-3 md:gap-4 mb-8 bg-white/90 p-3 rounded-2xl shadow-sm border border-gray-200 w-full max-w-[98vw]">
+                <button onclick="switchSubView('view-rank')" id="btn-sub-view-rank" class="sub-btn shrink-0 bg-[#005A9C] text-white px-6 py-3 rounded-xl font-bold text-xl md:text-2xl shadow-sm">📊 排名</button>
+                <button onclick="switchSubView('view-hot')" id="btn-sub-view-hot" class="sub-btn shrink-0 text-gray-500 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold text-xl md:text-2xl transition-colors">🔥 近況</button>
+                <button onclick="switchSubView('view-mvp')" id="btn-sub-view-mvp" class="sub-btn shrink-0 text-gray-500 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold text-xl md:text-2xl transition-colors">👑 MVP / 🏆 賽揚</button>
+                <button onclick="switchSubView('view-radar')" id="btn-sub-view-radar" class="sub-btn shrink-0 text-gray-500 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold text-xl md:text-2xl transition-colors">📈 雷達</button>
+                <button onclick="switchSubView('view-scatter')" id="btn-sub-view-scatter" class="sub-btn shrink-0 text-gray-500 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold text-xl md:text-2xl transition-colors">🌌 散佈</button>
+                <button onclick="switchSubView('view-h2h')" id="btn-sub-view-h2h" class="sub-btn shrink-0 text-gray-500 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold text-xl md:text-2xl transition-colors">⚖️ 對決</button>
+                <button onclick="switchSubView('view-milb')" id="btn-sub-view-milb" class="sub-btn shrink-0 text-gray-500 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold text-xl md:text-2xl transition-colors">🌱 MiLB 大物</button>
+            </div>
+            
+            <div class="w-full max-w-[98vw] bg-white/95 border border-gray-200 p-4 md:p-6 rounded-2xl backdrop-blur-xl shadow-xl relative mb-12">
+                
+                <div id="view-rank" class="sub-view active w-full">
+                    
+                    <div class="w-full bg-gray-50/80 border-2 border-gray-200 p-5 rounded-2xl mb-6 flex flex-wrap gap-4 items-end justify-center shadow-sm">
+                        <datalist id="player-datalist"></datalist>
+
+                        <div class="flex flex-col">
+                            <label class="text-sm font-black text-[#005A9C] uppercase tracking-wider mb-2">Type (類型)</label>
+                            <select id="filter-ptype" onchange="updateSortOptions()" class="bg-white border-2 border-[#005A9C] text-gray-900 rounded-xl px-4 py-2 outline-none focus:ring-4 focus:ring-blue-200 font-bold text-lg shadow-sm cursor-pointer hover:bg-blue-50 transition-colors">
+                                <option value="打者" selected>⚾ 打者 (Batter)</option>
+                                <option value="投手">🎯 投手 (Pitcher)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex flex-col" id="pos-filter-container">
+                            <label class="text-sm font-black text-[#005A9C] uppercase tracking-wider mb-2">Pos (守位)</label>
+                            <select id="filter-pos" class="bg-white border-2 border-[#005A9C] text-[#005A9C] rounded-xl px-4 py-2 outline-none focus:ring-4 focus:ring-blue-200 font-bold text-lg shadow-sm cursor-pointer hover:bg-blue-50 transition-colors"></select>
+                        </div>
+
+                        <div class="flex flex-col">
+                            <label class="text-sm font-black text-[#005A9C] uppercase tracking-wider mb-2">Season (賽季)</label>
+                            <select id="filter-year" class="bg-white border-2 border-[#005A9C] text-gray-900 rounded-xl px-4 py-2 outline-none focus:ring-4 focus:ring-blue-200 font-bold text-lg shadow-sm cursor-pointer hover:bg-blue-50 transition-colors">
+                                <option value="2026" selected>2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col" id="pa-filter-container">
+                            <label class="text-sm font-black text-[#005A9C] uppercase tracking-wider mb-2">Min PA/IP</label>
+                            <input type="number" id="filter-pa" value="100" step="50" class="bg-white border-2 border-[#005A9C] text-gray-900 rounded-xl px-4 py-2 w-28 outline-none focus:ring-4 focus:ring-blue-200 font-bold text-lg shadow-sm text-center">
+                        </div>
+
+                        <div class="flex flex-col" id="sort-container">
+                            <label class="text-sm font-black text-[#005A9C] uppercase tracking-wider mb-2">Sort By (排序)</label>
+                            <select id="filter-sort" class="bg-white border-2 border-[#005A9C] text-gray-900 rounded-xl px-4 py-2 outline-none focus:ring-4 focus:ring-blue-200 font-bold text-lg shadow-sm cursor-pointer hover:bg-blue-50 transition-colors"></select>
+                        </div>
+
+                        <button id="btn-update-db" onclick="handleGlobalUpdate()" class="bg-[#005A9C] hover:bg-[#004A80] text-white font-black text-lg py-2 px-8 rounded-xl transition-all hover:scale-105 shadow-md flex items-center gap-2">
+                            更新資料庫 🔄
+                        </button>
+                    </div>
+                    
+                    <div id="league-top-scroll" class="w-full overflow-x-auto overflow-y-hidden mb-2 bg-gray-100 rounded-t-xl border-2 border-gray-200">
+                        <div id="league-top-scroll-content" class="h-[1px] min-w-[2200px]"></div>
+                    </div>
+                    
+                    <div id="league-table-scroll" class="w-full overflow-x-auto border-2 border-gray-200 rounded-b-xl shadow-inner bg-white relative">
+                        <table id="league-main-table" class="super-table w-full text-left min-w-[2200px]">
+                            <thead id="table-head" class="bg-gray-100 text-gray-700 font-black sticky top-0 z-30 shadow-sm">
+                            </thead>
+                            <tbody id="league-table-body" class="divide-y divide-gray-200 font-bold">
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div id="view-hot" class="sub-view w-full hidden">
+                    
+                    <div class="w-full bg-red-50/80 border-2 border-red-200 p-5 rounded-2xl mb-6 flex flex-wrap gap-4 items-end justify-center shadow-sm">
+                        <div class="flex flex-col">
+                            <label class="text-sm font-black text-[#CE1141] uppercase tracking-wider mb-2">Type (類型)</label>
+                            <select id="hot-ptype" onchange="loadHotData()" class="bg-white border-2 border-[#CE1141] text-gray-900 rounded-xl px-4 py-2 outline-none focus:ring-4 focus:ring-red-200 font-bold text-lg shadow-sm cursor-pointer">
+                                <option value="打者" selected>⚾ 打者</option>
+                                <option value="投手">🎯 投手</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex flex-col">
+                            <label class="text-sm font-black text-[#CE1141] uppercase tracking-wider mb-2">Timeframe (區間)</label>
+                            <select id="hot-time" onchange="loadHotData()" class="bg-white border-2 border-[#CE1141] text-[#CE1141] rounded-xl px-4 py-2 outline-none focus:ring-4 focus:ring-red-200 font-black text-lg shadow-sm cursor-pointer">
+                                <option value="近 7 天" selected>🔥 近 7 天</option>
+                                <option value="近 15 天">🔥 近 15 天</option>
+                                <option value="近 30 天">🔥 近 30 天</option>
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col">
+                            <label class="text-sm font-black text-[#CE1141] uppercase tracking-wider mb-2">Pos (守位)</label>
+                            <select id="hot-pos" onchange="loadHotData()" class="bg-white border-2 border-[#CE1141] text-gray-900 rounded-xl px-4 py-2 outline-none focus:ring-4 focus:ring-red-200 font-bold text-lg shadow-sm cursor-pointer">
+                                <option value="ALL">所有位置 (ALL)</option>
+                                <option value="SP">先發投手 (SP)</option>
+                                <option value="RP">後援投手 (RP)</option>
+                                <option value="CL">終結者 (CL)</option>
+                                <option value="C">捕手 (C)</option>
+                                <option value="1B">一壘手 (1B)</option>
+                                <option value="2B">二壘手 (2B)</option>
+                                <option value="3B">三壘手 (3B)</option>
+                                <option value="SS">游擊手 (SS)</option>
+                                <option value="OF">外野手 (OF)</option>
+                                <option value="DH">指定打擊 (DH)</option>
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col">
+                            <label class="text-sm font-black text-[#CE1141] uppercase tracking-wider mb-2">League (聯盟)</label>
+                            <select id="hot-league" onchange="loadHotData()" class="bg-white border-2 border-[#CE1141] text-gray-900 rounded-xl px-4 py-2 outline-none focus:ring-4 focus:ring-red-200 font-bold text-lg shadow-sm cursor-pointer">
+                                <option value="MLB" selected>全聯盟 (MLB)</option>
+                                <option value="AL">美聯 (AL)</option>
+                                <option value="NL">國聯 (NL)</option>
+                            </select>
+                        </div>
+
+                        <button onclick="loadHotData()" class="bg-[#CE1141] hover:bg-red-700 text-white font-black text-lg py-2 px-8 rounded-xl transition-all hover:scale-105 shadow-md flex items-center gap-2">
+                            分析近況 🚀
+                        </button>
+                    </div>
+
+                    <div id="hot-top-scroll" class="w-full overflow-x-auto overflow-y-hidden bg-gray-100 rounded-t-xl border-2 border-gray-200">
+                        <div id="hot-top-scroll-content" style="height: 1px;"></div>
+                    </div>
+                        
+                    <div id="hot-table-scroll" class="w-full overflow-x-auto border-2 border-t-0 border-gray-200 rounded-b-xl bg-white mb-6">
+                        <table id="hot-main-table" class="super-table w-full text-left min-w-[1500px]">
+                            <thead id="hot-table-head" class="bg-gray-100 text-gray-700 font-black sticky top-0 z-30 shadow-sm"></thead>
+                            <tbody id="hot-table-body" class="divide-y divide-gray-200 font-bold"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+
+                <div id="view-mvp" class="sub-view w-full hidden">
+                    <h2 id="awards-title" class="text-3xl font-black text-center mb-4 text-gray-800 tracking-wider">👑 MVP 指數風雲榜</h2>
+                    <div class="flex justify-center gap-2 mb-8">
+                        <button onclick="setLeagueFilter('ALL')" id="btn-lg-ALL" class="lg-btn px-6 py-1 rounded-full bg-[#005A9C] text-white font-bold text-sm shadow-md">全聯盟</button>
+                        <button onclick="setLeagueFilter('AL')" id="btn-lg-AL" class="lg-btn px-6 py-1 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300 font-bold text-sm shadow-sm">美國聯盟 (AL)</button>
+                        <button onclick="setLeagueFilter('NL')" id="btn-lg-NL" class="lg-btn px-6 py-1 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300 font-bold text-sm shadow-sm">國家聯盟 (NL)</button>
+                    </div>
+                    <div id="mvp-podium" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 max-w-4xl mx-auto"></div>
+                    <div class="overflow-x-auto border-2 border-gray-200 rounded-xl">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b-2 border-yellow-500 text-yellow-700 text-sm uppercase bg-yellow-50/50 sticky top-0 z-10">
+                                    <th class="p-3">Rank</th><th class="p-3">Player</th><th class="p-3 text-center">Team</th><th class="p-3 text-center">Pos</th>
+                                    <th class="p-3 text-center" id="awards-metric-head">MVP 指數</th><th class="p-3 text-center">WAR</th><th class="p-3 text-center">Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mvp-table-body" class="text-gray-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="view-radar" class="sub-view w-full hidden">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">球員雷達對決</h2>
+                    
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-6">
+                        <select id="radar-ptype" onchange="updateRadarMetricSelects(); drawRadar(true);" class="bg-white border-2 border-[#005A9C] text-[#005A9C] rounded-lg px-4 py-2 shadow-sm font-black cursor-pointer outline-none">
+                            <option value="打者" selected>⚾ 打者</option>
+                            <option value="投手">🎯 投手</option>
+                        </select>
+                        
+                        <input type="text" id="radar-p1" list="player-datalist" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg px-4 py-2 shadow-sm font-bold w-full md:w-64 text-center" placeholder="選擇球員 1 (支援下拉選單)...">
+                        
+                        <span class="text-2xl font-bold text-gray-400">VS</span>
+                        <input type="text" id="radar-p2" list="player-datalist" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg px-4 py-2 shadow-sm font-bold w-full md:w-64 text-center" placeholder="選擇球員 2 (支援下拉選單)...">
+                        
+                        <button onclick="drawRadar()" class="bg-[#CE1141] text-white px-8 py-2 rounded-lg font-bold hover:scale-105 shadow-md w-full md:w-auto">分析</button>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6 bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
+                        <div class="text-2xl font-black text-[#005A9C] col-span-full mb-3 text-center drop-shadow-sm">🛠️ 自訂雷達圖 6 大分析指標</div>
+                        
+                        <select id="radar-metric-1" class="p-3 border-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#005A9C] outline-none font-bold text-gray-800 text-lg tracking-wide" onchange="drawRadar()"></select>
+                        <select id="radar-metric-2" class="p-3 border-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#005A9C] outline-none font-bold text-gray-800 text-lg tracking-wide" onchange="drawRadar()"></select>
+                        <select id="radar-metric-3" class="p-3 border-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#005A9C] outline-none font-bold text-gray-800 text-lg tracking-wide" onchange="drawRadar()"></select>
+                        <select id="radar-metric-4" class="p-3 border-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#005A9C] outline-none font-bold text-gray-800 text-lg tracking-wide" onchange="drawRadar()"></select>
+                        <select id="radar-metric-5" class="p-3 border-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#005A9C] outline-none font-bold text-gray-800 text-lg tracking-wide" onchange="drawRadar()"></select>
+                        <select id="radar-metric-6" class="p-3 border-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#005A9C] outline-none font-bold text-gray-800 text-lg tracking-wide" onchange="drawRadar()"></select>
+                    </div>
+
+                    <div class="w-full max-w-3xl mx-auto relative h-[450px] md:h-[700px]"><canvas id="radarChart"></canvas></div>
+                    <div id="radar-table-container" class="w-full max-w-4xl mx-auto mt-8 mb-10 transition-opacity duration-300"></div>
+                </div>
+
+                <div id="view-scatter" class="sub-view w-full hidden">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">指標散佈圖</h2>
+                    <div class="flex flex-wrap justify-center items-center gap-4 mb-6">
+                        <div class="flex items-center gap-2 text-gray-700 font-bold">Type: 
+                            <select id="scatter-ptype" onchange="if(typeof updateMetricSelects === 'function') updateMetricSelects(); drawScatter();" class="bg-white border border-[#005A9C] text-[#005A9C] rounded px-2 py-1 shadow-sm cursor-pointer outline-none">
+                                <option value="打者" selected>⚾ 打者</option>
+                                <option value="投手">🎯 投手</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-700 font-bold">X軸: <select id="scatter-x" class="bg-gray-50 border border-gray-300 text-gray-900 rounded px-2 py-1 shadow-sm"></select></div>
+
+                        <div class="flex items-center gap-2 text-gray-700 font-bold">Y軸: <select id="scatter-y" class="bg-gray-50 border border-gray-300 text-gray-900 rounded px-2 py-1 shadow-sm"></select></div>
+                        
+                        <input type="text" id="scatter-search-input" list="player-datalist" placeholder="輸入球員標亮..." class="bg-white border border-[#005A9C] text-gray-900 rounded-lg px-4 py-1.5 shadow-sm font-bold w-48 text-center outline-none focus:ring-2 focus:ring-[#005A9C]">
+                        
+                        <button onclick="drawScatter()" class="bg-[#005A9C] text-white px-6 py-1.5 rounded-lg font-bold hover:scale-105 shadow-md">繪製</button>
+                    </div>
+                    <div class="w-full max-w-5xl mx-auto relative h-[500px] md:h-[750px]"><canvas id="scatterChart"></canvas></div>
+                </div>
+
+                <div id="view-h2h" class="sub-view w-full hidden">
+                    <h2 class="text-3xl font-black text-center mb-6 text-gray-800">⚖️ 球員單挑 Head-to-Head 對決</h2>
+                    
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-200 shadow-sm">
+                        <select id="h2h-ptype" onchange="updateH2HMetricOptions(); renderH2H(true);" class="bg-white border-2 border-[#005A9C] text-[#005A9C] rounded-xl px-4 py-2.5 shadow-sm font-black text-lg cursor-pointer outline-none">
+                            <option value="打者" selected>⚾ 打者對決</option>
+                            <option value="投手">🎯 投手對決</option>
+                        </select>
+                        
+                        <input type="text" id="h2h-p1" list="player-datalist" class="bg-white border-2 border-gray-300 text-gray-900 rounded-xl px-4 py-2.5 shadow-sm font-bold text-lg w-full md:w-64 text-center focus:border-[#005A9C] outline-none" placeholder="選擇球員 1 (支援下拉選單)...">
+                        
+                        <span class="text-2xl font-black text-gray-400">VS</span>
+                        
+                        <input type="text" id="h2h-p2" list="player-datalist" class="bg-white border-2 border-gray-300 text-gray-900 rounded-xl px-4 py-2.5 shadow-sm font-bold text-lg w-full md:w-64 text-center focus:border-[#005A9C] outline-none" placeholder="選擇球員 2 (支援下拉選單)...">
+                        
+                        <button onclick="renderH2H()" class="bg-[#CE1141] text-white px-8 py-2.5 rounded-xl font-black text-lg hover:scale-105 shadow-md transition-transform w-full md:w-auto">
+                            開始單挑 🚀
+                        </button>
+                    </div>
+
+                    <div class="bg-gray-50 p-5 rounded-2xl border border-gray-200 shadow-sm mb-6 max-w-4xl mx-auto">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-lg font-black text-[#005A9C]">🛠️ 自訂 PK 比對數據指標 (可自由多選)</span>
+                            <span class="text-sm font-bold text-gray-500">💡 勾選後下方對決表會即時更新</span>
+                        </div>
+                        <div id="h2h-metrics-checkboxes" class="flex flex-wrap gap-3"></div>
+                    </div>
+
+                    <div id="h2h-results" class="w-full max-w-4xl mx-auto mb-10"></div>
+                </div>
+
+                <div id="view-milb" class="sub-view w-full hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">🌱 MiLB 小聯盟農場雷達</h2>
+                        
+                        <div class="flex items-center gap-3">
+                            <select id="milb-level" onchange="fetchMiLBData()" class="bg-gray-50 border border-[#005A9C] text-[#005A9C] font-bold rounded-lg px-4 py-1 shadow-sm">
+                                <option value="11">AAA (3A)</option>
+                                <option value="12">AA (2A)</option>
+                                <option value="13">High-A (高階1A)</option>
+                                <option value="14">Single-A (低階1A)</option>
+                            </select>
+                            
+                            <select id="milb-ptype" onchange="fetchMiLBData()" class="bg-white border border-[#005A9C] text-[#005A9C] font-bold rounded-lg px-4 py-1 shadow-sm cursor-pointer outline-none">
+                                <option value="打者" selected>⚾ 打者</option>
+                                <option value="投手">🎯 投手</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto border-2 border-gray-200 rounded-xl">
+                        <table class="w-full text-left border-collapse">
+                            <thead><tr id="milb-table-head" class="border-b-2 border-green-600 text-green-700 text-sm uppercase bg-green-50/50 sticky top-0 z-10"></tr></thead>
+                            <tbody id="milb-table-body" class="text-gray-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         </div>
     </main>
 
     <div id="glass-card" class="glass-cursor-card"><span class="cursor-text">Analyze</span></div>
+    <main id="predict-page" class="page-section flex-col items-center pt-10 w-full px-4 relative z-10 h-[91vh] overflow-y-auto pb-6">
+        <h1 class="text-4xl font-black mb-8 text-center text-[#005A9C] tracking-wide">Daily Schedule & AI Predictions</h1>
+        
+        <div class="w-full flex flex-col md:flex-row justify-center items-center mb-8 gap-4">
+            <input type="date" id="schedule-date" class="bg-white border-2 border-[#005A9C] text-[#005A9C] text-2xl rounded-xl px-6 py-3 shadow-md font-black outline-none focus:ring-4 focus:ring-blue-300 cursor-pointer">
+            <button onclick="fetchDailySchedule()" class="bg-[#CE1141] text-white px-10 py-3 rounded-xl font-black text-2xl hover:scale-105 transition-transform shadow-lg">加載賽事 📅</button>
+        </div>
 
-    <script>
-        // --- Tab 頁面切換控制 ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.className = "nav-btn text-lg font-bold text-white/70 border-b-2 border-transparent pb-1 hover:text-white transition-colors";
-            });
+        <div id="prediction-panel" class="w-full max-w-7xl bg-white/95 border border-gray-200 p-8 md:p-10 rounded-3xl shadow-2xl mb-10 hidden">
+            </div>
 
-            const target = document.getElementById(tabId);
-            const targetBtn = document.getElementById(`nav-${tabId.split('-')[0]}`);
-            if (target) {
-                target.classList.add('active');
-                targetBtn.className = "nav-btn text-lg font-bold text-[#005A9C] border-b-2 border-[#005A9C] pb-1 transition-colors";
-                gsap.fromTo(target, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 });
-                
-                if (tabId === 'roster-page') fetchRosterData();
-                if (tabId === 'league-page') fetchLeagueData();
-            }
-        }
-
-        // --- 📊 API: 動態抓取全聯盟打擊排行榜 ---
-        async function fetchLeagueData() {
-            const tableBody = document.getElementById('league-table-body');
-            const year = document.getElementById('filter-year').value;
-            const minPa = document.getElementById('filter-pa').value;
-            const sortBy = document.getElementById('filter-sort').value;
-
-            try {
-                tableBody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-[#005A9C] font-bold text-xl animate-pulse">📡 正在解析 ${year} 年大聯盟 Statcast 數據...</td></tr>`;
-                
-                const apiUrl = `http://127.0.0.1:8000/league-stats?year=${year}&min_pa=${minPa}&sort_by=${sortBy}`;
-                let response = await fetch(apiUrl);
-                let resData = await response.json();
-
-                if (resData.status === "success") {
-                    let html = '';
-                    resData.data.forEach((player, index) => {
-                        const hl_xwoba = sortBy === 'est_woba' ? 'text-[#005A9C] text-2xl font-black drop-shadow-[0_0_8px_rgba(0,90,156,0.8)]' : 'text-gray-300';
-                        const hl_xba = sortBy === 'est_ba' ? 'text-[#005A9C] text-2xl font-black drop-shadow-[0_0_8px_rgba(0,90,156,0.8)]' : 'text-gray-300';
-                        const hl_xslg = sortBy === 'est_slg' ? 'text-[#005A9C] text-2xl font-black drop-shadow-[0_0_8px_rgba(0,90,156,0.8)]' : 'text-gray-300 font-bold';
-
-                        html += `
-                        <tr class="border-b border-white/5 hover:bg-[#005A9C]/20 transition-colors">
-                            <td class="p-4 font-bold text-gray-400">#${index + 1}</td>
-                            <td class="p-4 font-bold text-white text-lg">${player.Name}</td>
-                            <td class="p-4 text-gray-300">${player.PA}</td>
-                            <td class="p-4 ${hl_xwoba}">${player.xwOBA.toFixed(3)}</td>
-                            <td class="p-4 ${hl_xba}">${player.xBA.toFixed(3)}</td>
-                            <td class="p-4 ${hl_xslg}">${player.xSLG.toFixed(3)}</td>
-                        </tr>
-                        `;
-                    });
-                    tableBody.innerHTML = html;
-                    gsap.from("#league-table-body tr", { opacity: 0, y: 10, stagger: 0.02, duration: 0.3 });
-                } else {
-                    tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-red-400">❌ 錯誤: ${resData.message}</td></tr>`;
-                }
-            } catch (error) {
-                tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-red-400">⚠️ API 連線失敗，請檢查 FastAPI。</td></tr>`;
-            }
-        }
-
-        // --- Scout 與 Roster API ---
-        async function fetchRosterData() {
-            try {
-                let response = await fetch("http://127.0.0.1:8000/roster");
-                let data = await response.json();
-                document.getElementById('manager-info').innerText = `${data.team_name} | Manager: ${data.manager}`;
-                const startersList = document.getElementById('starters-list'); const benchList = document.getElementById('bench-list');
-                startersList.innerHTML = ''; benchList.innerHTML = '';
-                data.starters.forEach(p => { startersList.innerHTML += `<div class="flex items-center justify-between bg-white/5 border border-[#005A9C]/30 p-3 rounded-lg"><div class="flex items-center gap-3"><span class="bg-[#005A9C] text-white text-xs font-bold px-2 py-1 rounded w-10 text-center">${p.position}</span><span class="text-lg font-medium text-white">${p.name}</span></div><span class="text-xs text-green-400 font-bold border border-green-400/30 px-2 py-1 rounded bg-green-400/10">${p.status}</span></div>`; });
-                data.bench.forEach(p => { let isIL = p.status.includes('IL'); let c1 = isIL ? 'text-red-400 border-red-400/30 bg-red-400/10' : 'text-gray-400 border-gray-400/30 bg-gray-400/10'; let c2 = isIL ? 'bg-red-900/50 text-red-200' : 'bg-gray-700 text-white'; benchList.innerHTML += `<div class="flex items-center justify-between bg-black/40 border border-white/5 p-3 rounded-lg"><div class="flex items-center gap-3"><span class="${c2} text-xs font-bold px-2 py-1 rounded w-10 text-center">${p.position}</span><span class="text-lg font-medium text-gray-300">${p.name}</span></div><span class="text-xs font-bold border px-2 py-1 rounded ${c1}">${p.status}</span></div>`; });
-                gsap.to("#roster-container", { opacity: 1, y: 0, duration: 0.8 });
-            } catch (error) {}
-        }
-
-        async function fetchScoutData(playerName) {
-            try {
-                gsap.to("#scout-card", { opacity: 0, y: 15, duration: 0.2 });
-                document.getElementById('player-info').innerText = "Querying Statcast... ⏳";
-                let response = await fetch(`http://127.0.0.1:8000/scout-report/${playerName}`); let data = await response.json();
-                if (data.Error) { document.getElementById('player-info').innerText = data.Error; } 
-                else {
-                    document.getElementById('player-info').innerText = data.Player_Name;
-                    document.getElementById('stat-xwoba').innerText = data.Advanced_Stats.xwOBA;
-                    document.getElementById('stat-xba').innerText = data.Advanced_Stats.xBA;
-                    document.getElementById('stat-ev').innerText = data.Advanced_Stats.Exit_Velocity + " mph";
-                    document.getElementById('stat-hardhit').innerText = data.Advanced_Stats.HardHit_Percent + " %";
-                }
-                gsap.to("#scout-card", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.1 });
-            } catch (error) {}
-        }
-
-        document.getElementById('search-btn').addEventListener('click', () => { let n = document.getElementById('search-input').value; if(n) fetchScoutData(n); });
-        document.getElementById('search-input').addEventListener('keypress', (e) => { if(e.key==='Enter'){ let n = document.getElementById('search-input').value; if(n) fetchScoutData(n); } });
-        window.onload = () => fetchScoutData("Shohei Ohtani");
-
-        // 游標
-        const glassCard = document.getElementById('glass-card');
-        document.addEventListener('mousemove', (e) => { glassCard.classList.add('active'); glassCard.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`; });
-    </script>
+        <div id="daily-matches-grid" class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+    </main>
+    
+    <script src="main.js"></script>
 </body>
 </html>

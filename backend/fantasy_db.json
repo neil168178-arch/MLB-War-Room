@@ -1,0 +1,854 @@
+{
+    "active_league": "Bang Bang Play",
+    "active_team": "MV3",
+    "custom_roster": [
+        {
+            "Player": "Salvador Perez",
+            "Position": "UTIL",
+            "Slot": "UTIL",
+            "Status": "Active",
+            "Team": "FA",
+            "name": "Salvador Perez",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Freddie Freeman",
+            "pos": "1B",
+            "slot": "1B",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Tommy Edman",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Ernie Clement",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "CJ Abrams",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Brice Turang",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Randy Arozarena",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Chandler Simpson",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Yordan Alvarez",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Brandon Lowe",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Sal Stewart",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Colson Montgomery",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Jordan Walker",
+            "pos": "UTIL",
+            "slot": "BN",
+            "status": "Bench",
+            "team": "FA"
+        },
+        {
+            "name": "Mookie Betts",
+            "pos": "UTIL",
+            "slot": "BN",
+            "status": "Bench",
+            "team": "FA"
+        },
+        {
+            "name": "Cody Bellinger",
+            "pos": "UTIL",
+            "slot": "IL",
+            "status": "IL",
+            "team": "FA"
+        },
+        {
+            "name": "Adley Rutschman",
+            "pos": "UTIL",
+            "slot": "IL",
+            "status": "IL",
+            "team": "FA"
+        },
+        {
+            "name": "Will Smith",
+            "pos": "UTIL",
+            "slot": "IL",
+            "status": "IL",
+            "team": "FA"
+        },
+        {
+            "name": "Shane Bieber",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Joey Cantillo",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Chase Burns",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Kyle Bradish",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Logan Henderson",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Louis Varland",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "David Bednar",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Jacob Latz",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Cam Schlittler",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Shota Imanaga",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Zack Wheeler",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Ranger Suarez",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Zac Thornton",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Hunter Brown",
+            "pos": "UTIL",
+            "slot": "BN",
+            "status": "Bench",
+            "team": "FA"
+        },
+        {
+            "name": "Yoshinobu Yamamoto",
+            "pos": "UTIL",
+            "slot": "BN",
+            "status": "Bench",
+            "team": "FA"
+        },
+        {
+            "name": "Nolan McLean",
+            "pos": "UTIL",
+            "slot": "BN",
+            "status": "Bench",
+            "team": "FA"
+        },
+        {
+            "name": "Edwin Díaz",
+            "pos": "UTIL",
+            "slot": "IL",
+            "status": "IL",
+            "team": "FA"
+        }
+    ],
+    "league_name": "Bang Bang Play",
+    "leagues": {
+        "Bang Bang Play": {
+            "teams": {
+                "MV3": [
+                    {
+                        "Player": "Salvador Perez",
+                        "Position": "UTIL",
+                        "Slot": "UTIL",
+                        "Status": "Active",
+                        "Team": "FA",
+                        "name": "Salvador Perez",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Freddie Freeman",
+                        "pos": "1B",
+                        "slot": "1B",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Tommy Edman",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Ernie Clement",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "CJ Abrams",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Brice Turang",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Randy Arozarena",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Chandler Simpson",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Yordan Alvarez",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Brandon Lowe",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Sal Stewart",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Colson Montgomery",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Jordan Walker",
+                        "pos": "UTIL",
+                        "slot": "BN",
+                        "status": "Bench",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Mookie Betts",
+                        "pos": "UTIL",
+                        "slot": "BN",
+                        "status": "Bench",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Cody Bellinger",
+                        "pos": "UTIL",
+                        "slot": "IL",
+                        "status": "IL",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Adley Rutschman",
+                        "pos": "UTIL",
+                        "slot": "IL",
+                        "status": "IL",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Will Smith",
+                        "pos": "UTIL",
+                        "slot": "IL",
+                        "status": "IL",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Shane Bieber",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Joey Cantillo",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Chase Burns",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Kyle Bradish",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Logan Henderson",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Louis Varland",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "David Bednar",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Jacob Latz",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Cam Schlittler",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Shota Imanaga",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Zack Wheeler",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Ranger Suarez",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Zac Thornton",
+                        "pos": "UTIL",
+                        "slot": "UTIL",
+                        "status": "Active",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Hunter Brown",
+                        "pos": "UTIL",
+                        "slot": "BN",
+                        "status": "Bench",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Yoshinobu Yamamoto",
+                        "pos": "UTIL",
+                        "slot": "BN",
+                        "status": "Bench",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Nolan McLean",
+                        "pos": "UTIL",
+                        "slot": "BN",
+                        "status": "Bench",
+                        "team": "FA"
+                    },
+                    {
+                        "name": "Edwin Díaz",
+                        "pos": "UTIL",
+                        "slot": "IL",
+                        "status": "IL",
+                        "team": "FA"
+                    }
+                ]
+            },
+            "weights": {
+                "hitter": {
+                    "1B": 3,
+                    "2B": 6,
+                    "3B": 10,
+                    "BB": 2,
+                    "CYC": 20,
+                    "E": -3,
+                    "H": 2,
+                    "HBP": 3,
+                    "HR": 15,
+                    "K": -2,
+                    "R": 3,
+                    "RBI": 2,
+                    "SB": 5,
+                    "SLAM": 30
+                },
+                "pitcher": {
+                    "BB": -1,
+                    "BSV": -10,
+                    "ER": -3,
+                    "H": -1,
+                    "HBP": -2.0,
+                    "HLD": 3,
+                    "HR": -5.0,
+                    "K": 4.0,
+                    "L": -10,
+                    "OUT": 1,
+                    "QS": 10,
+                    "SHO": 15,
+                    "SO": 4,
+                    "SV": 8,
+                    "W": 20,
+                    "WP": -3
+                }
+            },
+            "ignored_players": []
+        }
+    },
+    "my_roster": [
+        {
+            "Player": "Salvador Perez",
+            "Position": "UTIL",
+            "Slot": "UTIL",
+            "Status": "Active",
+            "Team": "FA",
+            "name": "Salvador Perez",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Freddie Freeman",
+            "pos": "1B",
+            "slot": "1B",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Tommy Edman",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Ernie Clement",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "CJ Abrams",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Brice Turang",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Randy Arozarena",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Chandler Simpson",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Yordan Alvarez",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Brandon Lowe",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Sal Stewart",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Colson Montgomery",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Jordan Walker",
+            "pos": "UTIL",
+            "slot": "BN",
+            "status": "Bench",
+            "team": "FA"
+        },
+        {
+            "name": "Mookie Betts",
+            "pos": "UTIL",
+            "slot": "BN",
+            "status": "Bench",
+            "team": "FA"
+        },
+        {
+            "name": "Cody Bellinger",
+            "pos": "UTIL",
+            "slot": "IL",
+            "status": "IL",
+            "team": "FA"
+        },
+        {
+            "name": "Adley Rutschman",
+            "pos": "UTIL",
+            "slot": "IL",
+            "status": "IL",
+            "team": "FA"
+        },
+        {
+            "name": "Will Smith",
+            "pos": "UTIL",
+            "slot": "IL",
+            "status": "IL",
+            "team": "FA"
+        },
+        {
+            "name": "Shane Bieber",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Joey Cantillo",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Chase Burns",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Kyle Bradish",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Logan Henderson",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Louis Varland",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "David Bednar",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Jacob Latz",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Cam Schlittler",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Shota Imanaga",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Zack Wheeler",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Ranger Suarez",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Zac Thornton",
+            "pos": "UTIL",
+            "slot": "UTIL",
+            "status": "Active",
+            "team": "FA"
+        },
+        {
+            "name": "Hunter Brown",
+            "pos": "UTIL",
+            "slot": "BN",
+            "status": "Bench",
+            "team": "FA"
+        },
+        {
+            "name": "Yoshinobu Yamamoto",
+            "pos": "UTIL",
+            "slot": "BN",
+            "status": "Bench",
+            "team": "FA"
+        },
+        {
+            "name": "Nolan McLean",
+            "pos": "UTIL",
+            "slot": "BN",
+            "status": "Bench",
+            "team": "FA"
+        },
+        {
+            "name": "Edwin Díaz",
+            "pos": "UTIL",
+            "slot": "IL",
+            "status": "IL",
+            "team": "FA"
+        }
+    ],
+    "team_name": "MV3",
+    "weights": {
+        "hitter": {
+            "1B": 3,
+            "2B": 6,
+            "3B": 10,
+            "BB": 2,
+            "CYC": 20,
+            "E": -3,
+            "H": 2,
+            "HBP": 3,
+            "HR": 15,
+            "K": -2,
+            "R": 3,
+            "RBI": 2,
+            "SB": 5,
+            "SLAM": 30
+        },
+        "pitcher": {
+            "BB": -1,
+            "BSV": -10,
+            "ER": -3,
+            "H": -1,
+            "HBP": -2.0,
+            "HLD": 3,
+            "HR": -5.0,
+            "K": 4.0,
+            "L": -10,
+            "OUT": 1,
+            "QS": 10,
+            "SHO": 15,
+            "SO": 4,
+            "SV": 8,
+            "W": 20,
+            "WP": -3
+        },
+        "Hitter": {
+            "1B": 3,
+            "2B": 6,
+            "3B": 10,
+            "BB": 2,
+            "CYC": 20,
+            "E": -3,
+            "H": 2,
+            "HBP": 3,
+            "HR": 15,
+            "K": -2,
+            "R": 3,
+            "RBI": 2,
+            "SB": 5,
+            "SLAM": 30
+        },
+        "Pitcher": {
+            "BB": -1,
+            "BSV": -10,
+            "ER": -3,
+            "H": -1,
+            "HBP": -2.0,
+            "HLD": 3,
+            "HR": -5.0,
+            "K": 4.0,
+            "L": -10,
+            "OUT": 1,
+            "QS": 10,
+            "SHO": 15,
+            "SO": 4,
+            "SV": 8,
+            "W": 20,
+            "WP": -3
+        }
+    }
+}
