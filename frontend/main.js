@@ -92,7 +92,7 @@ window.updateRealPts = async function(name, newPts) {
     try {
         let pts = parseFloat(newPts);
         if (isNaN(pts)) pts = 0.0;
-        await fetch(API_BASE_URL + "/fantasy/update-player", {
+        await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/update-player", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: name, real_pts: pts })
         });
@@ -469,7 +469,7 @@ window.renderYahooTeam = async function() {
     const container = document.getElementById('fan-my-team');
     container.innerHTML = `<div class="text-center text-[#005A9C] text-3xl font-bold animate-pulse py-10">連線至資料庫載入您的專屬陣容...</div>`;
     try {
-        let res = await fetch(API_BASE_URL + "/fantasy/yahoo-team");
+        let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/yahoo-team");
         let data = await res.json();
         if (data.status === "success") {
             AI_RECOMMENDED_PLAYERS = []; 
@@ -717,7 +717,7 @@ async function manualAddPlayer() {
 
 async function addPlayerToMyTeam(name, team = "FA", pos = "UTIL") {
     try {
-        let res = await fetch(API_BASE_URL + "/fantasy/add-player", {
+        let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/add-player", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: name, team: team, pos: pos })
         });
@@ -730,7 +730,7 @@ async function addPlayerToMyTeam(name, team = "FA", pos = "UTIL") {
 async function dropPlayer(name) {
     if (!confirm(`確定要釋出 ${name} 嗎？`)) return;
     try {
-        let res = await fetch(API_BASE_URL + "/fantasy/drop-player", {
+        let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/drop-player", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: name })
         });
@@ -874,7 +874,7 @@ window.ignorePlayerInMarket = async function(name, currentType) {
     if(!confirm(`確定要將 【${name}】 從自由市場中永久去除嗎？\n(這通常代表該球員已經在您的真實 Yahoo 聯盟中被其他玩家選走了)`)) return;
     
     try {
-        let res = await fetch(API_BASE_URL + "/fantasy/ignore-player", {
+        let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/ignore-player", {
             method: "POST", headers: {"Content-Type": "application/json"},
             body: JSON.stringify({name: name})
         });
@@ -939,7 +939,7 @@ async function executeTradeAnalysis() {
     resultBox.innerHTML = `<div class="text-[#005A9C] font-black text-3xl animate-pulse text-center py-10">🧠 AI 總管正在分析龐大交易數據庫...</div>`;
     
     try {
-        let res = await fetch(API_BASE_URL + "/fantasy/trade-analyzer", {
+        let res = awaitfetch("https://mlb-war-room-l7ps.onrender.com/fantasy/trade-analyzer", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ give_players: givePlayers, receive_players: recPlayers })
@@ -990,7 +990,7 @@ async function renderProspects() {
     const container = document.getElementById('fan-prospects');
     container.innerHTML = `<div class="text-center text-[#005A9C] text-3xl font-bold animate-pulse py-10">掃描小聯盟農場中...</div>`;
     try {
-        let res = await fetch(API_BASE_URL + "/fantasy/prospects");
+        let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/prospects");
         let data = await res.json();
         if (data.status === "success") {
             let html = `
@@ -2228,7 +2228,7 @@ async function renderFantasySettings() {
     container.innerHTML = `<div class="text-center text-[#005A9C] text-3xl font-bold animate-pulse py-10">讀取資料庫設定中...</div>`;
     
     try {
-        let res = await fetch(API_BASE_URL + "/fantasy/settings");
+        let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/settings");
         let data = await res.json();
         
         if (data.status === 'success') {
@@ -2308,7 +2308,7 @@ async function saveFantasySettings() {
     });
     
    try {
-        let res = await fetch(API_BASE_URL + "/fantasy/settings", {
+        let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/settings", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ league_name: leagueName, team_name: teamName, weights: weights })
         });
@@ -2470,7 +2470,7 @@ function handlePTypeChange() {
 // 🔄 調整球員先發板凳位置 (Slot)
 async function updatePlayerSlot(name, newSlot) {
     try {
-        let res = await fetch(API_BASE_URL + "/fantasy/update-player", {
+        let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/update-player", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: name, slot: newSlot })
         });
@@ -2484,7 +2484,7 @@ async function updatePlayerPos(name, currentPos) {
     let newPos = prompt(`請為 ${name} 自訂新的守備位置 (例如: SS, 2B, OF)：`, currentPos);
     if (newPos !== null && newPos.trim() !== "") {
         try {
-            let res = await fetch(API_BASE_URL + "/fantasy/update-player", {
+            let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/update-player", {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name: name, pos: newPos.trim().toUpperCase() })
             });
@@ -2499,7 +2499,7 @@ window.updateRealPts = async function(name, newPts) {
         let pts = parseFloat(newPts);
         if (isNaN(pts)) pts = 0.0;
         
-        let res = await fetch(API_BASE_URL + "/fantasy/update-player", {
+        let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/update-player", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: name, real_pts: pts })
         });
@@ -2516,7 +2516,7 @@ async function handleContextChange(isLeagueChange) {
     if (isLeagueChange) t = ""; // 若切換聯盟，讓後端自動抓該聯盟的第一支球隊
     
     try {
-        await fetch(API_BASE_URL + "/fantasy/switch-context", {
+        awaitfetch("https://mlb-war-room-l7ps.onrender.com/fantasy/switch-context", {
             method: "POST", headers: {"Content-Type":"application/json"},
             body: JSON.stringify({league: l, team: t})
         });
@@ -2530,7 +2530,7 @@ async function createNewLeagueOrTeam() {
     if (action === "1") {
         const lName = prompt("請為您的新聯盟命名：");
         if(lName && lName.trim()) {
-            await fetch(API_BASE_URL + "/fantasy/switch-context", {
+            await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/switch-context", {
                 method: "POST", headers: {"Content-Type":"application/json"},
                 body: JSON.stringify({league: lName.trim(), team: "我的新球隊"})
             });
@@ -2540,7 +2540,7 @@ async function createNewLeagueOrTeam() {
         const tName = prompt("請為您的新球隊命名：");
         const currentL = document.getElementById('fan-league-select').value;
         if(tName && tName.trim()) {
-            await fetch(API_BASE_URL + "/fantasy/switch-context", {
+            await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/switch-context", {
                 method: "POST", headers: {"Content-Type":"application/json"},
                 body: JSON.stringify({league: currentL, team: tName.trim()})
             });
@@ -2551,7 +2551,7 @@ async function createNewLeagueOrTeam() {
 // ⚡ 一鍵簽下 AI 推薦球員
 async function quickAddPlayer(name, team, pos) {
     try {
-        let res = await fetch(API_BASE_URL + "/fantasy/add-player", {
+        let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/add-player", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({ name: name, team: team, pos: pos })
