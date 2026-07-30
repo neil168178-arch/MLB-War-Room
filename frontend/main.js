@@ -546,10 +546,6 @@ window.renderYahooTeam = async function() {
             </div>
 
             <div class="flex flex-col gap-10 w-full">
-                
-                // =====================================
-                // 🟢 先發陣容表格
-                // =====================================
                 <div class="bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden w-full">
                     <div class="bg-blue-50 px-6 py-4 border-b border-blue-100 font-black text-[#005A9C] flex justify-between items-center text-2xl whitespace-nowrap">
                         <span>🟢 先發陣容 (Active Roster)</span>
@@ -596,10 +592,6 @@ window.renderYahooTeam = async function() {
                         </table>
                     </div>
                 </div>
-
-                // =====================================
-                // ⚪ 板凳與傷兵表格
-                // =====================================
                 <div class="bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden w-full">
                     <div class="bg-gray-100 px-6 py-4 border-b border-gray-200 font-black text-gray-600 text-2xl">⚪ 板凳與傷兵 (Bench / IL)</div>
                     <div class="overflow-x-auto">
