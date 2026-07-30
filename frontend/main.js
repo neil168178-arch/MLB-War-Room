@@ -469,7 +469,7 @@ window.renderYahooTeam = async function() {
     const container = document.getElementById('fan-my-team');
     container.innerHTML = `<div class="text-center text-[#005A9C] text-3xl font-bold animate-pulse py-10">連線至資料庫載入您的專屬陣容...</div>`;
     try {
-        let res = await fetch("${API_BASE_URL}/fantasy/yahoo-team");
+        let res = await fetch(API_BASE_URL + "/fantasy/yahoo-team");
         let data = await res.json();
         if (data.status === "success") {
             AI_RECOMMENDED_PLAYERS = []; 
@@ -990,7 +990,7 @@ async function renderProspects() {
     const container = document.getElementById('fan-prospects');
     container.innerHTML = `<div class="text-center text-[#005A9C] text-3xl font-bold animate-pulse py-10">掃描小聯盟農場中...</div>`;
     try {
-        let res = await fetch("${API_BASE_URL}/fantasy/prospects");
+        let res = await fetch(API_BASE_URL + "/fantasy/prospects");
         let data = await res.json();
         if (data.status === "success") {
             let html = `
@@ -2228,7 +2228,7 @@ async function renderFantasySettings() {
     container.innerHTML = `<div class="text-center text-[#005A9C] text-3xl font-bold animate-pulse py-10">讀取資料庫設定中...</div>`;
     
     try {
-        let res = await fetch("${API_BASE_URL}/fantasy/settings");
+        let res = await fetch(API_BASE_URL + "/fantasy/settings");
         let data = await res.json();
         
         if (data.status === 'success') {
@@ -2308,7 +2308,7 @@ async function saveFantasySettings() {
     });
     
    try {
-        let res = await fetch("${API_BASE_URL}/fantasy/settings", {
+        let res = await fetch(API_BASE_URL + "/fantasy/settings", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ league_name: leagueName, team_name: teamName, weights: weights })
         });
@@ -2470,7 +2470,7 @@ function handlePTypeChange() {
 // 🔄 調整球員先發板凳位置 (Slot)
 async function updatePlayerSlot(name, newSlot) {
     try {
-        let res = await fetch("${API_BASE_URL}/fantasy/update-player", {
+        let res = await fetch(API_BASE_URL + "/fantasy/update-player", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: name, slot: newSlot })
         });
@@ -2484,7 +2484,7 @@ async function updatePlayerPos(name, currentPos) {
     let newPos = prompt(`請為 ${name} 自訂新的守備位置 (例如: SS, 2B, OF)：`, currentPos);
     if (newPos !== null && newPos.trim() !== "") {
         try {
-            let res = await fetch("${API_BASE_URL}/fantasy/update-player", {
+            let res = await fetch(API_BASE_URL + "/fantasy/update-player", {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name: name, pos: newPos.trim().toUpperCase() })
             });
@@ -2499,7 +2499,7 @@ window.updateRealPts = async function(name, newPts) {
         let pts = parseFloat(newPts);
         if (isNaN(pts)) pts = 0.0;
         
-        let res = await fetch("${API_BASE_URL}/fantasy/update-player", {
+        let res = await fetch(API_BASE_URL + "/fantasy/update-player", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: name, real_pts: pts })
         });
@@ -2516,7 +2516,7 @@ async function handleContextChange(isLeagueChange) {
     if (isLeagueChange) t = ""; // 若切換聯盟，讓後端自動抓該聯盟的第一支球隊
     
     try {
-        await fetch("${API_BASE_URL}/fantasy/switch-context", {
+        await fetch(API_BASE_URL + "/fantasy/switch-context", {
             method: "POST", headers: {"Content-Type":"application/json"},
             body: JSON.stringify({league: l, team: t})
         });
@@ -2530,7 +2530,7 @@ async function createNewLeagueOrTeam() {
     if (action === "1") {
         const lName = prompt("請為您的新聯盟命名：");
         if(lName && lName.trim()) {
-            await fetch("${API_BASE_URL}/fantasy/switch-context", {
+            await fetch(API_BASE_URL + "/fantasy/switch-context", {
                 method: "POST", headers: {"Content-Type":"application/json"},
                 body: JSON.stringify({league: lName.trim(), team: "我的新球隊"})
             });
