@@ -488,20 +488,26 @@ window.renderYahooTeam = async function() {
                 t_html += `<option value="${t}" ${t === data.team_name ? 'selected' : ''}>${t}</option>`;
             });
 
-            // 💡 1. 系統自動在前端計算出「本日總分」與「本週總分」
-            let realDailyTotal = 0;
-            let realWeeklyTotal = 0;
-            let projTotal = 0;
+            // 💡 1. 系統自動計算：本週預期、本週實際累計總分、本日得分
+            let realWeeklyTotal = 0;  // 本週實際總分
+            let realDailyTotal = 0;   // 本日得分
+            let projTotal = 0;        // 本週預期總分
 
             data.active_roster.forEach(p => {
-                // 列表顯示的是「本日」分數 (教練手動改過就用教練的，不然用 API 本日分數)
+                // 優先使用資料庫中的 real_pts（即自動結算或總教練手動更正的本週累計分數）
                 let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : (p.actual_pts || 0);
-                let dailyVal = parseFloat(defaultReal);
-                if (!isNaN(dailyVal)) realDailyTotal += dailyVal;
+                let val = parseFloat(defaultReal);
                 
-                // 本週總分 = (API近7日總分) - (API本日總分) + (您看到的本日總分)
-                let weeklyVal = (p.weekly_pts || 0) - (p.actual_pts || 0) + (isNaN(dailyVal) ? 0 : dailyVal);
-                realWeeklyTotal += weeklyVal;
+                // 累加先發陣容的本週累計得分
+                if (!isNaN(val)) {
+                    realWeeklyTotal += val;
+                }
+                
+                // 本日當天得分 (由 API 回傳的單日分數)
+                let dailyVal = parseFloat(p.actual_pts || 0);
+                if (!isNaN(dailyVal)) {
+                    realDailyTotal += dailyVal;
+                }
                 
                 projTotal += (p.fan_pts || 0);
             });
@@ -534,7 +540,7 @@ window.renderYahooTeam = async function() {
                             <div class="text-3xl font-black text-gray-800">${projTotal.toFixed(1)}</div>
                         </div>
                         <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 text-center shadow-inner">
-                            <div class="text-sm font-black text-[#005A9C] mb-1">本週實際(近7日)</div>
+                            <div class="text-sm font-black text-[#005A9C] mb-1">本週實際</div>
                             <div class="text-3xl font-black text-[#005A9C]">${realWeeklyTotal.toFixed(1)}</div>
                         </div>
                         <div class="bg-green-50 px-4 py-2 rounded-xl border border-green-200 text-center shadow-inner">
