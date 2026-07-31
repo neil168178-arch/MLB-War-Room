@@ -23,12 +23,12 @@ class UpdatePlayerRequest(BaseModel):
     real_pts: Optional[float] = None
 app = FastAPI()
 
-# 💡 終極跨域通行證：允許任何網頁 (包含 Vercel) 來要資料
+# 🚨 貼上這段 CORS 全域通行證 👇
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 允許所有來源
+    allow_origins=["*"],  # 允許所有前端網址連線 (包含您新的 Vercel 網址)
     allow_credentials=True,
-    allow_methods=["*"],  # 允許所有方法 (GET, POST 等)
+    allow_methods=["*"],  # 允許 GET, POST 等所有方法
     allow_headers=["*"],  # 允許所有標頭
 )
 # ==========================================
