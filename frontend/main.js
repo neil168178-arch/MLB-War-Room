@@ -488,28 +488,23 @@ window.renderYahooTeam = async function() {
                 t_html += `<option value="${t}" ${t === data.team_name ? 'selected' : ''}>${t}</option>`;
             });
 
-            // 💡 1. 系統自動計算：本週預期、本週實際累計總分、本日得分
-            let realWeeklyTotal = 0;  // 本週實際總分
-            let realDailyTotal = 0;   // 本日得分
-            let projTotal = 0;        // 本週預期總分
+           // 💡 1. 系統自動計算：本週即時總分 (Live) + 手動補分 = 最終本週實際
+            let realWeeklyTotal = 0;  
+            let projTotal = 0;
 
             data.active_roster.forEach(p => {
-                // 優先使用資料庫中的 real_pts（即自動結算或總教練手動更正的本週累計分數）
-                let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : 0;
-                let val = parseFloat(defaultReal);
+                // 系統即時算出的本週分數 (Streamlit 引擎)
+                let liveWeekly = parseFloat(p.weekly_pts || 0);
+                // 總教練手動補的修正分數 (原本的 real_pts 拿來當補分)
+                let bonusPts = parseFloat(p.real_pts || 0); 
                 
-                // 累加先發陣容的本週累計得分
-                if (!isNaN(val)) {
-                    realWeeklyTotal += val;
+                // 最終總分 = 系統即時 + 手動補分
+                let totalPts = liveWeekly + bonusPts;
+                
+                if (!isNaN(totalPts)) {
+                    realWeeklyTotal += totalPts;
                 }
-                
-                // 本日當天得分 (由 API 回傳的單日分數)
-                let dailyVal = parseFloat(p.actual_pts || 0);
-                if (!isNaN(dailyVal)) {
-                    realDailyTotal += dailyVal;
-                }
-                
-                projTotal += (p.fan_pts || 0);
+                projTotal += parseFloat(p.fan_pts || 0);
             });
 
             let html = `
@@ -550,11 +545,7 @@ window.renderYahooTeam = async function() {
                     </div>
                 </div>
             </div>
-            <div class="w-full mb-8">
-                <button id="autoUpdateBtn" onclick="autoUpdateAllPts()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-black text-2xl py-4 rounded-2xl shadow-md transition-colors flex items-center justify-center gap-3">
-                    🤖 一鍵自動結算本週 (美東週一至今) 真實分數
-                </button>
-            </div>
+    
             <div class="flex flex-col gap-10 w-full">
                 <div class="bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden w-full">
                     <div class="bg-blue-50 px-6 py-4 border-b border-blue-100 font-black text-[#005A9C] flex justify-between items-center text-2xl whitespace-nowrap">
@@ -575,7 +566,11 @@ window.renderYahooTeam = async function() {
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 ${data.active_roster.map(p => {
-                                    let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : 0;
+                                    // 💡 提取即時分數與手動補分
+                                    let livePts = parseFloat(p.weekly_pts || 0);
+                                    let bonusPts = parseFloat(p.real_pts || 0);
+                                    let totalPts = livePts + bonusPts;
+                                    
                                     return `
                                 <tr class="hover:bg-blue-50/50 transition-colors">
                                     <td class="p-4 text-center">
@@ -591,7 +586,13 @@ window.renderYahooTeam = async function() {
                                     <td class="p-4 text-center font-bold text-gray-600 text-xl">${p.has_game ? `<span class="text-[#005A9C] font-black">${p.today_game}</span>` : 'OFF'}</td>
                                     <td class="p-4 text-center font-black text-[#005A9C] text-3xl">${p.fan_pts}</td>
                                     <td class="p-4 text-center">
-                                        <input type="number" step="0.1" value="${Number(defaultReal).toFixed(1)}" onchange="updateRealPts('${p.name.replace(/'/g, "\\'")}', this.value)" class="w-24 text-center font-black text-green-600 text-3xl bg-gray-50 border-2 border-gray-300 rounded-xl focus:bg-white outline-none py-1 shadow-inner">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <span class="text-xl font-bold text-gray-400" title="系統即時算分">${livePts.toFixed(1)}</span>
+                                            <span class="text-gray-300 font-black">+</span>
+                                            <input type="number" step="0.1" value="${bonusPts.toFixed(1)}" onchange="updateRealPts('${p.name.replace(/'/g, "\\'")}', this.value)" class="w-16 text-center font-bold text-orange-500 text-xl bg-orange-50 border border-orange-200 rounded-lg outline-none py-1 shadow-inner focus:bg-white focus:ring-2 focus:ring-orange-300" title="手動補分區 (例如: 補上 QS 或 HLD 的分數)">
+                                            <span class="text-gray-300 font-black">=</span>
+                                            <span class="text-3xl font-black text-green-600" title="最終總分">${totalPts.toFixed(1)}</span>
+                                        </div>
                                     </td>
                                     <td class="p-4 text-center">
                                         <button onclick="dropPlayer('${p.name.replace(/'/g, "\\'")}')" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg text-lg font-black border border-red-200">釋出 🗑️</button>
@@ -618,7 +619,11 @@ window.renderYahooTeam = async function() {
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 ${data.inactive_roster.map(p => {
-                                    let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : 0;
+                                    // 💡 提取即時分數與手動補分 (板凳區)
+                                    let livePts = parseFloat(p.weekly_pts || 0);
+                                    let bonusPts = parseFloat(p.real_pts || 0);
+                                    let totalPts = livePts + bonusPts;
+                                    
                                     return `
                                 <tr class="hover:bg-gray-50">
                                     <td class="p-4 text-center w-32">
@@ -634,7 +639,13 @@ window.renderYahooTeam = async function() {
                                     <td class="p-4 text-center font-bold text-gray-400 text-xl">${p.has_game ? p.today_game : 'OFF'}</td>
                                     <td class="p-4 text-center font-black text-gray-400 text-3xl">${p.fan_pts}</td>
                                     <td class="p-4 text-center">
-                                        <input type="number" step="0.1" value="${Number(defaultReal).toFixed(1)}" onchange="updateRealPts('${p.name.replace(/'/g, "\\'")}', this.value)" class="w-24 text-center font-black text-gray-500 text-3xl bg-gray-100 border-2 border-gray-200 rounded-xl outline-none py-1 shadow-inner">
+                                        <div class="flex items-center justify-center gap-2 opacity-80">
+                                            <span class="text-xl font-bold text-gray-400" title="系統即時算分">${livePts.toFixed(1)}</span>
+                                            <span class="text-gray-300 font-black">+</span>
+                                            <input type="number" step="0.1" value="${bonusPts.toFixed(1)}" onchange="updateRealPts('${p.name.replace(/'/g, "\\'")}', this.value)" class="w-16 text-center font-black text-gray-500 text-xl bg-gray-100 border border-gray-200 rounded-lg outline-none py-1 shadow-inner focus:bg-white" title="手動補分區">
+                                            <span class="text-gray-300 font-black">=</span>
+                                            <span class="text-3xl font-black text-gray-500" title="最終總分">${totalPts.toFixed(1)}</span>
+                                        </div>
                                     </td>
                                     <td class="p-4 text-center w-32">
                                         <button onclick="dropPlayer('${p.name.replace(/'/g, "\\'")}')" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg text-lg font-black border border-red-200">釋出 🗑️</button>
