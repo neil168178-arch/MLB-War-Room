@@ -544,7 +544,11 @@ window.renderYahooTeam = async function() {
                     </div>
                 </div>
             </div>
-
+            <div class="w-full mb-8">
+                <button id="autoUpdateBtn" onclick="autoUpdateAllPts()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-black text-2xl py-4 rounded-2xl shadow-md transition-colors flex items-center justify-center gap-3">
+                    🤖 一鍵自動結算本週 (美東週一至今) 真實分數
+                </button>
+            </div>
             <div class="flex flex-col gap-10 w-full">
                 <div class="bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden w-full">
                     <div class="bg-blue-50 px-6 py-4 border-b border-blue-100 font-black text-[#005A9C] flex justify-between items-center text-2xl whitespace-nowrap">
@@ -3605,5 +3609,37 @@ window.loadHotData = async function() {
     } catch (e) {
         console.error(e);
         if (tbody) tbody.innerHTML = `<tr><td colspan="35" class="text-center py-10 text-red-500 font-bold text-2xl">連線失敗，請確認 API 服務已啟動。</td></tr>`;
+    }
+}
+// 🤖 驅動自動結算的專屬函數
+window.autoUpdateAllPts = async function() {
+    if (!confirm("⚠️ 系統將自動抓取美國本週一至今天的累積數據，並更新球隊分數。\n(注意：系統抓不到的特殊加分如 QS, HLD, BSV 等，結算後請手動點擊分數補上)")) {
+        return;
+    }
+    
+    let btn = document.getElementById("autoUpdateBtn");
+    let originalText = btn.innerHTML;
+    btn.innerHTML = "⏳ 正在與大聯盟連線抓取數據中，請稍候...";
+    btn.disabled = true;
+    btn.classList.add("opacity-50", "cursor-not-allowed");
+
+    try {
+        // 💡 呼叫您的 Render 後端自動計分 API
+        let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/auto-update-real-pts", { 
+            method: "POST" 
+        });
+        
+        let data = await res.json();
+        alert(data.message);
+        
+        // 重新載入畫面，最新的分數就會出現！
+        renderYahooTeam();
+    } catch (error) {
+        console.error("更新失敗:", error);
+        alert("連線後端失敗，請稍後再試！");
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        btn.classList.remove("opacity-50", "cursor-not-allowed");
     }
 }
