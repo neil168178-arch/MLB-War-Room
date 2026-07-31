@@ -3676,3 +3676,6 @@ window.autoUpdateAllPts = async function() {
         btn.disabled = false;
     }
 }
+function updateTeamWeeklyPts(newPts) {
+    console.log("總教練已手動修正本週實際總分: " + newPts);
+}
