@@ -823,7 +823,7 @@ window.renderFreeAgents = async function(pType = "打者", posFilter = "ALL", se
                     const aiBadge = isAiRec ? `<span class="ml-3 bg-yellow-400 text-gray-900 px-3 py-1 rounded-lg text-sm font-black shadow-sm border border-yellow-500 animate-pulse">🤖 AI 強推</span>` : '';
 
                     // 💡 加入了這行！系統自動判斷並帶入近7日實際分數 (actual_pts)
-                    let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : 0;
+                    let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : (p.actual_pts || 0);
 
                     html += `
                     <tr class="hover:bg-blue-50/50 transition-colors ${isAiRec ? 'bg-yellow-50/30' : ''}">
@@ -3628,9 +3628,8 @@ window.autoUpdateAllPts = async function() {
     btn.disabled = true;
 
     try {
-        // 💡 這裡一樣寫死 Render 網址！
         let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/auto-update-real-pts", { 
-            method: "POST" 
+        method: "POST" 
         });
         
         let data = await res.json();
