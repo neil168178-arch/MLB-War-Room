@@ -2620,11 +2620,16 @@ def get_mvp_cyyoung(year: int = 2026):
 def get_pts_maps():
     try:
         import pytz
+        from datetime import datetime, timedelta
+        
         # 採用美東時間，早上 10 點前算昨天的比賽 (對應台灣時間晚上 10 點)
         us_tz = pytz.timezone('US/Eastern')
         logical_today = datetime.now(us_tz) - timedelta(hours=10)
         daily_str = logical_today.strftime('%Y-%m-%d')
-        weekly_start_str = (logical_today - timedelta(days=6)).strftime('%Y-%m-%d')
+        
+        # 🚨 終極校準：把原本的 - timedelta(days=6) 換成這兩行！
+        days_since_monday = logical_today.weekday() # 0 是星期一
+        weekly_start_str = (logical_today - timedelta(days=days_since_monday)).strftime('%Y-%m-%d')
         
         db = load_fantasy_db()
         al = db.get("active_league")
