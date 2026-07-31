@@ -497,20 +497,24 @@ window.renderYahooTeam = async function() {
            // 💡 1. 系統自動計算：本週即時總分 (Live) + 手動補分 = 最終本週實際
             let realWeeklyTotal = 0;  
             let projTotal = 0;
+            let realDailyTotal = 0;  // 🚨 抓到了！就是之前漏掉這行，導致畫面崩潰！
 
             data.active_roster.forEach(p => {
-                // 系統即時算出的本週分數 (Streamlit 引擎)
+                // 系統即時算出的本週分數 + 手動補分
                 let liveWeekly = parseFloat(p.weekly_pts || 0);
-                // 總教練手動補的修正分數 (原本的 real_pts 拿來當補分)
                 let bonusPts = parseFloat(p.real_pts || 0); 
-                
-                // 最終總分 = 系統即時 + 手動補分
                 let totalPts = liveWeekly + bonusPts;
                 
                 if (!isNaN(totalPts)) {
                     realWeeklyTotal += totalPts;
                 }
                 projTotal += parseFloat(p.fan_pts || 0);
+                
+                // 🚨 補回：本日單日得分
+                let dailyVal = parseFloat(p.actual_pts || 0);
+                if (!isNaN(dailyVal)) {
+                    realDailyTotal += dailyVal;
+                }
             });
 
             let html = `
