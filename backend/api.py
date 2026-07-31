@@ -2110,12 +2110,12 @@ def get_real_season_stats(year=None):
         print(f"真實數據載入警告: {e}")
         # 🛡️ 終極防呆：如果 MLB API 剛好掛掉，退而求其次回傳舊快取，不要讓畫面空白
         return cached_data if cached_data else {}
-def calc_real_fan_pts(p_type, stat, w_hit, w_pit, special_events=None):
+def calc_real_fan_pts(p_type, stat, w_hit, w_pit, special_events=None, is_cumulative=False):
     """
     計算真實 Fantasy 積分 (支援硬核計分：QS, BSV, WP, HLD, 等)
     """
     if special_events is None:
-        special_events = {"cyc": 0, "slam": 0}
+            special_events = {"cyc": 0, "slam": 0}
 
     if p_type == "hitter":
         g = int(stat.get('gamesPlayed', 1)) or 1
@@ -2164,7 +2164,10 @@ def calc_real_fan_pts(p_type, stat, w_hit, w_pit, special_events=None):
             int(stat.get('qualityStarts', 0)) * w_pit.get("QS", 10.0) +
             int(stat.get('blownSaves', 0)) * w_pit.get("BSV", -10.0)
         )
-        return pts / g
+        if is_cumulative:
+            return pts
+        else:
+            return pts / g
 
 _STATCAST_CACHE = {}
 
@@ -2697,3 +2700,89 @@ def update_player_in_roster(req: UpdatePlayerRequest):
         return {"status": "error", "message": f"找不到球員: {req.name}"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+from datetime import datetime, timedelta
+import pytz
+from pybaseball import batting_stats_range, pitching_stats_range
+import json
+
+def get_us_current_week_range():
+    """獲取美國時間本週一到今天的日期區間"""
+    tz_ny = pytz.timezone('America/New_York')
+    today_us = datetime.now(tz_ny)
+    days_since_monday = today_us.weekday() # 0 是星期一
+    monday_us = today_us - timedelta(days=days_since_monday)
+    return monday_us.strftime('%Y-%m-%d'), today_us.strftime('%Y-%m-%d')
+
+@app.post("/fantasy/auto-update-real-pts")
+def auto_update_real_pts():
+    start_date, end_date = get_us_current_week_range()
+    
+    try:
+        bat_df = batting_stats_range(start_date, end_date)
+        pitch_df = pitching_stats_range(start_date, end_date)
+    except Exception as e:
+        return {"message": f"無法連線大聯盟數據庫：{str(e)}"}
+
+    try:
+        with open("fantasy_db.json", "r", encoding="utf-8") as f:
+            db = json.load(f)
+    except:
+        return {"message": "找不到資料庫檔案"}
+
+    updated_count = 0
+    w_hit = DEFAULT_WEIGHTS["hitter"]
+    w_pit = DEFAULT_WEIGHTS["pitcher"]
+    
+    for player in db.get("yahoo_team", []):
+        name = player.get("name")
+        if not name: continue
+        
+        is_updated = False
+        stat_dict = {}
+        
+        # 打者處理
+        if bat_df is not None and not bat_df.empty and name in bat_df['Name'].values:
+            row = bat_df[bat_df['Name'] == name].iloc[0]
+            stat_dict.update({
+                'gamesPlayed': 1,
+                'hits': int(row.get('H', 0)),
+                'doubles': int(row.get('2B', 0)),
+                'triples': int(row.get('3B', 0)),
+                'homeRuns': int(row.get('HR', 0)),
+                'rbi': int(row.get('RBI', 0)),
+                'runs': int(row.get('R', 0)),
+                'stolenBases': int(row.get('SB', 0)),
+                'baseOnBalls': int(row.get('BB', 0)),
+                'hitByPitch': int(row.get('HBP', 0)),
+                'strikeOuts': int(row.get('SO', 0)), 
+            })
+            pts = calc_real_fan_pts("hitter", stat_dict, w_hit, w_pit, is_cumulative=True)
+            player['real_pts'] = round(pts, 2)
+            is_updated = True
+
+        # 投手處理
+        elif pitch_df is not None and not pitch_df.empty and name in pitch_df['Name'].values:
+            row = pitch_df[pitch_df['Name'] == name].iloc[0]
+            stat_dict.update({
+                'gamesPlayed': 1,
+                'wins': int(row.get('W', 0)),
+                'losses': int(row.get('L', 0)),
+                'saves': int(row.get('SV', 0)),
+                'hits': int(row.get('H', 0)),
+                'earnedRuns': int(row.get('ER', 0)),
+                'homeRuns': int(row.get('HR', 0)),
+                'baseOnBalls': int(row.get('BB', 0)),
+                'strikeOuts': int(row.get('SO', 0)),
+                'inningsPitched': str(row.get('IP', '0')), 
+            })
+            pts = calc_real_fan_pts("pitcher", stat_dict, w_hit, w_pit, is_cumulative=True)
+            player['real_pts'] = round(pts, 2)
+            is_updated = True
+
+        if is_updated:
+            updated_count += 1
+
+    with open("fantasy_db.json", "w", encoding="utf-8") as f:
+        json.dump(db, f, indent=4, ensure_ascii=False)
+
+    return {"message": f"🤖 本週自動計分完畢！已更新 {start_date} 至 {end_date} 期間，共 {updated_count} 位球員的分數。"}
