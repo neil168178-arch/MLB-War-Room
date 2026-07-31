@@ -572,36 +572,31 @@ window.renderYahooTeam = async function() {
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 ${data.active_roster.map(p => {
-                                    // 💡 提取即時分數與手動補分
-                                    let livePts = parseFloat(p.weekly_pts || 0);
-                                    let bonusPts = parseFloat(p.real_pts || 0);
-                                    let totalPts = livePts + bonusPts;
+                                    // 🛡️ 終極防呆：遇到空位子絕對不當機
+                                    let nameSafe = p.name ? p.name.replace(/'/g, "\\'") : '';
+                                    let slotSafe = p.slot || '';
+                                    let posSafe = p.pos || '';
+                                    let realPts = parseFloat(p.real_pts || 0);
                                     
                                     return `
                                 <tr class="hover:bg-blue-50/50 transition-colors">
                                     <td class="p-4 text-center">
-                                        <select onchange="updatePlayerSlot('${p.name.replace(/'/g, "\\'")}', this.value)" class="bg-gray-100 text-gray-800 font-black px-4 py-2 rounded-lg text-lg outline-none focus:ring-2 focus:ring-[#005A9C] cursor-pointer border border-gray-200 hover:bg-gray-200 w-full text-center">
-                                            ${['C','1B','2B','3B','SS','OF','UTIL','SP','RP','P','BN','IL'].map(s => `<option value="${s}" ${p.slot === s ? 'selected' : ''}>${s}</option>`).join('')}
+                                        <select onchange="updatePlayerSlot('${nameSafe}', this.value)" class="bg-gray-100 text-gray-800 font-black px-4 py-2 rounded-lg text-lg outline-none focus:ring-2 focus:ring-[#005A9C] cursor-pointer border border-gray-200 hover:bg-gray-200 w-full text-center">
+                                            ${['C','1B','2B','3B','SS','OF','UTIL','SP','RP','P','BN','IL'].map(s => `<option value="${s}" ${slotSafe === s ? 'selected' : ''}>${s}</option>`).join('')}
                                         </select>
                                     </td>
                                     <td class="p-4">
-                                        <div class="font-black text-gray-900 text-2xl">${p.name} 
-                                            <span class="text-sm text-gray-400 font-bold ml-2">${p.team} - <span onclick="updatePlayerPos('${p.name.replace(/'/g, "\\'")}', '${p.pos}')" class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded cursor-pointer hover:bg-blue-100 transition-colors">${p.pos} ✏️</span></span>
+                                        <div class="font-black text-gray-900 text-2xl">${p.name || '空缺'} 
+                                            <span class="text-sm text-gray-400 font-bold ml-2">${p.team || ''} - <span onclick="updatePlayerPos('${nameSafe}', '${posSafe}')" class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded cursor-pointer hover:bg-blue-100 transition-colors">${posSafe} ✏️</span></span>
                                         </div>
                                     </td>
-                                    <td class="p-4 text-center font-bold text-gray-600 text-xl">${p.has_game ? `<span class="text-[#005A9C] font-black">${p.today_game}</span>` : 'OFF'}</td>
-                                    <td class="p-4 text-center font-black text-[#005A9C] text-3xl">${p.fan_pts}</td>
+                                    <td class="p-4 text-center font-bold text-gray-600 text-xl">${p.has_game ? `<span class="text-[#005A9C] font-black">${p.today_game || ''}</span>` : 'OFF'}</td>
+                                    <td class="p-4 text-center font-black text-[#005A9C] text-3xl">${parseFloat(p.fan_pts || 0).toFixed(1)}</td>
                                     <td class="p-4 text-center">
-                                        <div class="flex items-center justify-center gap-2">
-                                            <span class="text-xl font-bold text-gray-400" title="系統即時算分">${livePts.toFixed(1)}</span>
-                                            <span class="text-gray-300 font-black">+</span>
-                                            <input type="number" step="0.1" value="${bonusPts.toFixed(1)}" onchange="updateRealPts('${p.name.replace(/'/g, "\\'")}', this.value)" class="w-16 text-center font-bold text-orange-500 text-xl bg-orange-50 border border-orange-200 rounded-lg outline-none py-1 shadow-inner focus:bg-white focus:ring-2 focus:ring-orange-300" title="手動補分區 (例如: 補上 QS 或 HLD 的分數)">
-                                            <span class="text-gray-300 font-black">=</span>
-                                            <span class="text-3xl font-black text-green-600" title="最終總分">${totalPts.toFixed(1)}</span>
-                                        </div>
+                                        <input type="number" step="0.1" value="${realPts.toFixed(1)}" onchange="updateRealPts('${nameSafe}', this.value)" class="w-24 text-center font-black text-green-600 text-3xl bg-gray-50 border-2 border-gray-300 rounded-xl focus:bg-white outline-none py-1 shadow-inner" title="本週實際總分 (每日自動更新 / 可手動微調)">
                                     </td>
                                     <td class="p-4 text-center">
-                                        <button onclick="dropPlayer('${p.name.replace(/'/g, "\\'")}')" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg text-lg font-black border border-red-200">釋出 🗑️</button>
+                                        <button onclick="dropPlayer('${nameSafe}')" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg text-lg font-black border border-red-200">釋出 🗑️</button>
                                     </td>
                                 </tr>`; }).join('')}
                                 ${data.active_roster.length === 0 ? `<tr><td colspan="6" class="text-center py-8 text-gray-400 font-bold text-2xl">尚無球員...</td></tr>` : ''}
@@ -625,36 +620,31 @@ window.renderYahooTeam = async function() {
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 ${data.inactive_roster.map(p => {
-                                    // 💡 提取即時分數與手動補分 (板凳區)
-                                    let livePts = parseFloat(p.weekly_pts || 0);
-                                    let bonusPts = parseFloat(p.real_pts || 0);
-                                    let totalPts = livePts + bonusPts;
+                                    // 🛡️ 終極防呆 (板凳區)
+                                    let nameSafe = p.name ? p.name.replace(/'/g, "\\'") : '';
+                                    let slotSafe = p.slot || '';
+                                    let posSafe = p.pos || '';
+                                    let realPts = parseFloat(p.real_pts || 0);
                                     
                                     return `
                                 <tr class="hover:bg-gray-50">
                                     <td class="p-4 text-center w-32">
-                                        <select onchange="updatePlayerSlot('${p.name.replace(/'/g, "\\'")}', this.value)" class="${p.slot.includes('IL') ? 'bg-red-100 text-red-700 border-red-200' : 'bg-gray-200 text-gray-700 border-gray-300'} font-black px-4 py-2 rounded-lg text-lg outline-none cursor-pointer border w-full text-center">
-                                            ${['C','1B','2B','3B','SS','OF','UTIL','SP','RP','P','BN','IL'].map(s => `<option value="${s}" ${p.slot === s ? 'selected' : ''}>${s}</option>`).join('')}
+                                        <select onchange="updatePlayerSlot('${nameSafe}', this.value)" class="${slotSafe.includes('IL') ? 'bg-red-100 text-red-700 border-red-200' : 'bg-gray-200 text-gray-700 border-gray-300'} font-black px-4 py-2 rounded-lg text-lg outline-none cursor-pointer border w-full text-center">
+                                            ${['C','1B','2B','3B','SS','OF','UTIL','SP','RP','P','BN','IL'].map(s => `<option value="${s}" ${slotSafe === s ? 'selected' : ''}>${s}</option>`).join('')}
                                         </select>
                                     </td>
                                     <td class="p-4">
-                                        <div class="font-black text-gray-500 text-2xl">${p.name} 
-                                            <span class="text-sm text-gray-400 font-bold ml-2">${p.team} - <span onclick="updatePlayerPos('${p.name.replace(/'/g, "\\'")}', '${p.pos}')" class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded cursor-pointer">${p.pos} ✏️</span></span>
+                                        <div class="font-black text-gray-500 text-2xl">${p.name || '空缺'} 
+                                            <span class="text-sm text-gray-400 font-bold ml-2">${p.team || ''} - <span onclick="updatePlayerPos('${nameSafe}', '${posSafe}')" class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded cursor-pointer">${posSafe} ✏️</span></span>
                                         </div>
                                     </td>
-                                    <td class="p-4 text-center font-bold text-gray-400 text-xl">${p.has_game ? p.today_game : 'OFF'}</td>
-                                    <td class="p-4 text-center font-black text-gray-400 text-3xl">${p.fan_pts}</td>
+                                    <td class="p-4 text-center font-bold text-gray-400 text-xl">${p.has_game ? (p.today_game || '') : 'OFF'}</td>
+                                    <td class="p-4 text-center font-black text-gray-400 text-3xl">${parseFloat(p.fan_pts || 0).toFixed(1)}</td>
                                     <td class="p-4 text-center">
-                                        <div class="flex items-center justify-center gap-2 opacity-80">
-                                            <span class="text-xl font-bold text-gray-400" title="系統即時算分">${livePts.toFixed(1)}</span>
-                                            <span class="text-gray-300 font-black">+</span>
-                                            <input type="number" step="0.1" value="${bonusPts.toFixed(1)}" onchange="updateRealPts('${p.name.replace(/'/g, "\\'")}', this.value)" class="w-16 text-center font-black text-gray-500 text-xl bg-gray-100 border border-gray-200 rounded-lg outline-none py-1 shadow-inner focus:bg-white" title="手動補分區">
-                                            <span class="text-gray-300 font-black">=</span>
-                                            <span class="text-3xl font-black text-gray-500" title="最終總分">${totalPts.toFixed(1)}</span>
-                                        </div>
+                                        <input type="number" step="0.1" value="${realPts.toFixed(1)}" onchange="updateRealPts('${nameSafe}', this.value)" class="w-24 text-center font-black text-gray-500 text-3xl bg-gray-100 border-2 border-gray-200 rounded-xl outline-none py-1 shadow-inner focus:bg-white">
                                     </td>
                                     <td class="p-4 text-center w-32">
-                                        <button onclick="dropPlayer('${p.name.replace(/'/g, "\\'")}')" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg text-lg font-black border border-red-200">釋出 🗑️</button>
+                                        <button onclick="dropPlayer('${nameSafe}')" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg text-lg font-black border border-red-200">釋出 🗑️</button>
                                     </td>
                                 </tr>`; }).join('')}
                                 ${data.inactive_roster.length === 0 ? `<tr><td colspan="6" class="text-center py-8 text-gray-400 font-bold text-2xl">尚無球員...</td></tr>` : ''}
