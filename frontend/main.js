@@ -539,38 +539,22 @@ window.renderYahooTeam = async function() {
                         <button onclick="manualAddPlayer()" class="bg-[#005A9C] text-white px-6 py-3 rounded-xl font-black text-xl shadow-md hover:scale-105 transition-transform">➕ 簽下</button>
                     </div>
                     
-                    <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
-                    <div class="flex items-center gap-2 w-full relative">
-                        <input list="player-datalist" type="text" id="add-player-name" placeholder="搜尋並選擇球員..." class="px-5 py-3 rounded-xl border border-gray-300 font-bold text-gray-800 focus:ring-2 focus:ring-[#005A9C] outline-none text-xl w-full md:w-72">
-                        <datalist id="player-datalist"></datalist>
-                        <button onclick="manualAddPlayer()" class="bg-[#005A9C] text-white px-6 py-3 rounded-xl font-black text-xl shadow-md hover:scale-105 transition-transform">➕ 簽下</button>
-                    </div>
-                    
-                    <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
-                    <div class="flex items-center gap-2 w-full relative">
-                        <input list="player-datalist" type="text" id="add-player-name" placeholder="搜尋並選擇球員..." class="px-5 py-3 rounded-xl border border-gray-300 font-bold text-gray-800 focus:ring-2 focus:ring-[#005A9C] outline-none text-xl w-full md:w-72">
-                        <datalist id="player-datalist"></datalist>
-                        <button onclick="manualAddPlayer()" class="bg-[#005A9C] text-white px-6 py-3 rounded-xl font-black text-xl shadow-md hover:scale-105 transition-transform">➕ 簽下</button>
-                    </div>
-                    
                     <div class="text-right w-full md:w-auto border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6 flex gap-3">
                         <div class="bg-gray-50 px-4 py-2 rounded-xl border border-gray-200 text-center">
                             <div class="text-sm font-bold text-gray-500 mb-1">本週預期</div>
                             <div class="text-3xl font-black text-gray-800">${projTotal.toFixed(1)}</div>
                         </div>
-                        
                         <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 text-center shadow-inner">
-                            <div class="text-sm font-black text-[#005A9C] mb-1">本週實際 ✏️</div>
-                            <input type="number" step="0.1" value="${realWeeklyTotal.toFixed(1)}" onchange="updateTeamWeeklyPts(this.value)" class="w-32 text-center font-black text-[#005A9C] text-3xl bg-white border-2 border-blue-300 rounded-lg outline-none py-0.5 shadow-sm focus:ring-2 focus:ring-[#005A9C]" title="手動微調球隊總分">
+                            <div class="text-sm font-black text-[#005A9C] mb-1">本週實際</div>
+                            <div class="text-3xl font-black text-[#005A9C]">${realWeeklyTotal.toFixed(1)}</div>
                         </div>
-                        
                         <div class="bg-green-50 px-4 py-2 rounded-xl border border-green-200 text-center shadow-inner">
                             <div class="text-sm font-black text-green-700 mb-1">本日得分 🎯</div>
                             <div class="text-3xl font-black text-green-600">${realDailyTotal.toFixed(1)}</div>
                         </div>
                     </div>
                 </div>
-
+            </div>
     
             <div class="flex flex-col gap-10 w-full">
                 <div class="bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden w-full">
@@ -3689,9 +3673,4 @@ window.autoUpdateAllPts = async function() {
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
-}
-// 💡 總教練手動修改球隊總分的防呆接收器
-function updateTeamWeeklyPts(newPts) {
-    console.log("總教練已將本週總分強制修改為: " + newPts);
-    // 未來如果需要將這個手動總分存入後端資料庫，可以寫在這裡！
 }
