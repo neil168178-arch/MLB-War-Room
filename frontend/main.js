@@ -471,6 +471,12 @@ window.renderYahooTeam = async function() {
     try {
         let res = await fetch("https://mlb-war-room-l7ps.onrender.com/fantasy/yahoo-team");
         let data = await res.json();
+        // 🚨 X光透視鏡開始
+        console.log("🎯 抓到的原始資料:", data);
+        if (!data.active_roster) {
+        alert("後端有回傳，但找不到 active_roster (先發名單)！");
+        }
+        // 🚨 X光透視鏡結束
         if (data.status === "success") {
             AI_RECOMMENDED_PLAYERS = []; 
             if (data.ai_diagnosis && data.ai_diagnosis.recommendations) {
