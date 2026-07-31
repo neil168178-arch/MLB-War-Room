@@ -546,6 +546,13 @@ window.renderYahooTeam = async function() {
                         <button onclick="manualAddPlayer()" class="bg-[#005A9C] text-white px-6 py-3 rounded-xl font-black text-xl shadow-md hover:scale-105 transition-transform">➕ 簽下</button>
                     </div>
                     
+                    <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
+                    <div class="flex items-center gap-2 w-full relative">
+                        <input list="player-datalist" type="text" id="add-player-name" placeholder="搜尋並選擇球員..." class="px-5 py-3 rounded-xl border border-gray-300 font-bold text-gray-800 focus:ring-2 focus:ring-[#005A9C] outline-none text-xl w-full md:w-72">
+                        <datalist id="player-datalist"></datalist>
+                        <button onclick="manualAddPlayer()" class="bg-[#005A9C] text-white px-6 py-3 rounded-xl font-black text-xl shadow-md hover:scale-105 transition-transform">➕ 簽下</button>
+                    </div>
+                    
                     <div class="text-right w-full md:w-auto border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6 flex gap-3">
                         <div class="bg-gray-50 px-4 py-2 rounded-xl border border-gray-200 text-center">
                             <div class="text-sm font-bold text-gray-500 mb-1">本週預期</div>
@@ -563,7 +570,7 @@ window.renderYahooTeam = async function() {
                         </div>
                     </div>
                 </div>
-            </div>
+
     
             <div class="flex flex-col gap-10 w-full">
                 <div class="bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden w-full">
