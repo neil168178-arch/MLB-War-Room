@@ -495,7 +495,7 @@ window.renderYahooTeam = async function() {
 
             data.active_roster.forEach(p => {
                 // 優先使用資料庫中的 real_pts（即自動結算或總教練手動更正的本週累計分數）
-                let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : (p.actual_pts || 0);
+                let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : 0;
                 let val = parseFloat(defaultReal);
                 
                 // 累加先發陣容的本週累計得分
@@ -575,7 +575,7 @@ window.renderYahooTeam = async function() {
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 ${data.active_roster.map(p => {
-                                    let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : (p.actual_pts || 0);
+                                    let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : 0;
                                     return `
                                 <tr class="hover:bg-blue-50/50 transition-colors">
                                     <td class="p-4 text-center">
@@ -618,7 +618,7 @@ window.renderYahooTeam = async function() {
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 ${data.inactive_roster.map(p => {
-                                    let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : (p.actual_pts || 0);
+                                    let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : 0;
                                     return `
                                 <tr class="hover:bg-gray-50">
                                     <td class="p-4 text-center w-32">
@@ -823,7 +823,7 @@ window.renderFreeAgents = async function(pType = "打者", posFilter = "ALL", se
                     const aiBadge = isAiRec ? `<span class="ml-3 bg-yellow-400 text-gray-900 px-3 py-1 rounded-lg text-sm font-black shadow-sm border border-yellow-500 animate-pulse">🤖 AI 強推</span>` : '';
 
                     // 💡 加入了這行！系統自動判斷並帶入近7日實際分數 (actual_pts)
-                    let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : (p.actual_pts || 0);
+                    let defaultReal = (p.real_pts !== undefined && p.real_pts !== null && p.real_pts !== '') ? p.real_pts : 0;
 
                     html += `
                     <tr class="hover:bg-blue-50/50 transition-colors ${isAiRec ? 'bg-yellow-50/30' : ''}">
