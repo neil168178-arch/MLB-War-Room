@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import pytz
 import pybaseball
+pybaseball.cache.enable()
 from pybaseball import statcast_batter_expected_stats, statcast_pitcher_expected_stats
 from pybaseball import statcast_batter_exitvelo_barrels, statcast_pitcher_exitvelo_barrels
 from functools import lru_cache
@@ -2717,18 +2718,48 @@ def get_us_current_week_range():
 def auto_update_real_pts():
     start_date, end_date = get_us_current_week_range()
     
+    bat_df = None
+    pitch_df = None
+    
+    # 💡 終極防呆機制：自動處理「今天還沒打完無數據」以及「伺服器短暫阻擋」
     try:
         bat_df = batting_stats_range(start_date, end_date)
         pitch_df = pitching_stats_range(start_date, end_date)
+    except IndexError:
+        # 發生 IndexError 代表網頁上沒有表格 (通常是今天還沒打完/官方未更新)
+        try:
+            # 🧠 智慧退位：我們退一步，只抓到「昨天」
+            tz_ny = pytz.timezone('America/New_York')
+            today_us = datetime.now(tz_ny)
+            
+            # 如果今天是美國禮拜一，那這週真的還沒有任何完賽數據
+            if today_us.weekday() == 0:
+                return {"message": "⚾ 本週 (美東週一) 尚無完賽報表！官方數據通常於隔日更新，請明天再試，或手動點擊分數修改！"}
+            
+            yesterday = today_us - timedelta(days=1)
+            end_date_yesterday = yesterday.strftime('%Y-%m-%d')
+            
+            bat_df = batting_stats_range(start_date, end_date_yesterday)
+            pitch_df = pitching_stats_range(start_date, end_date_yesterday)
+            end_date = end_date_yesterday  # 更新成功後，把顯示日期改為昨天
+        except Exception:
+            return {"message": "⚠️ 暫時無法從官方抓取報表。可能官方正在更新，或伺服器受到短暫限制，請稍後再試！"}
     except Exception as e:
         return {"message": f"無法連線大聯盟數據庫：{str(e)}"}
 
+    # 如果連昨天都沒抓到，安全退出
+    if bat_df is None or pitch_df is None:
+        return {"message": "⚠️ 目前無有效的賽事數據可供結算，請稍後再試！"}
+
+    # ==========================================
+    # 以下為讀取資料庫與套用計分權重的邏輯
+    # ==========================================
     try:
         with open("fantasy_db.json", "r", encoding="utf-8") as f:
             db = json.load(f)
     except:
         return {"message": "找不到資料庫檔案"}
-
+        
     updated_count = 0
     w_hit = DEFAULT_WEIGHTS["hitter"]
     w_pit = DEFAULT_WEIGHTS["pitcher"]
@@ -2740,8 +2771,8 @@ def auto_update_real_pts():
         is_updated = False
         stat_dict = {}
         
-        # 打者處理
-        if bat_df is not None and not bat_df.empty and name in bat_df['Name'].values:
+        # 結算打者
+        if not bat_df.empty and name in bat_df['Name'].values:
             row = bat_df[bat_df['Name'] == name].iloc[0]
             stat_dict.update({
                 'gamesPlayed': 1,
@@ -2760,8 +2791,8 @@ def auto_update_real_pts():
             player['real_pts'] = round(pts, 2)
             is_updated = True
 
-        # 投手處理
-        elif pitch_df is not None and not pitch_df.empty and name in pitch_df['Name'].values:
+        # 結算投手
+        elif not pitch_df.empty and name in pitch_df['Name'].values:
             row = pitch_df[pitch_df['Name'] == name].iloc[0]
             stat_dict.update({
                 'gamesPlayed': 1,
@@ -2785,4 +2816,4 @@ def auto_update_real_pts():
     with open("fantasy_db.json", "w", encoding="utf-8") as f:
         json.dump(db, f, indent=4, ensure_ascii=False)
 
-    return {"message": f"🤖 本週自動計分完畢！已更新 {start_date} 至 {end_date} 期間，共 {updated_count} 位球員的分數。"}
+    return {"message": f"🤖 自動計分完畢！已成功更新 {start_date} 至 {end_date} 期間，共 {updated_count} 位球員的分數。"}
