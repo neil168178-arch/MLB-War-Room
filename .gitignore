@@ -12,6 +12,3 @@ env/
 # 💻 系統預設垃圾檔 (Mac / Windows)
 .DS_Store
 Thumbs.db
-
-
- fantasy_db.json
