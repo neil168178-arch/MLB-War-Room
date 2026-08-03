@@ -1614,24 +1614,46 @@ def save_fantasy_db(db_data):
     return local_ok, fb_ok, fb_msg
 
 
-# --- 🔗 全新切換聯盟/球隊 API ---
+# --- 🔗 全新切換聯盟/球隊 API (防彈升級版) ---
 class SwitchContextRequest(BaseModel):
     league: str
     team: str
 
 @app.post("/fantasy/switch-context")
 def switch_context(req: SwitchContextRequest):
-    db = load_fantasy_db()
-    db["active_league"] = req.league
-    if req.team: 
-        db["active_team"] = req.team
-    else:
-        # 如果只切換聯盟，自動選擇該聯盟的第一支球隊，若無則創建
-        teams = db.get("leagues", {}).get(req.league, {}).get("teams", {})
-        db["active_team"] = list(teams.keys())[0] if teams else "預設新球隊"
-    save_fantasy_db(db)
-    return {"status": "success"}
-
+    try:
+        db = load_fantasy_db()
+        al = req.league
+        
+        # 🛡️ 防呆 1：確保基礎結構存在
+        if "leagues" not in db:
+            db["leagues"] = {}
+        if al not in db["leagues"]:
+            db["leagues"][al] = {"teams": {}}
+            
+        db["active_league"] = al
+        
+        if req.team: 
+            at = req.team
+            # 🛡️ 防呆 2：如果切換過去的球隊剛好不見了，幫它建一個空名單
+            if at not in db["leagues"][al].get("teams", {}):
+                db["leagues"][al].setdefault("teams", {})[at] = []
+            db["active_team"] = at
+        else:
+            # 🛡️ 防呆 3：如果只切換聯盟，自動選擇第一支球隊；若無則「確實建立」預設新球隊
+            teams = db["leagues"][al].get("teams", {})
+            if teams:
+                db["active_team"] = list(teams.keys())[0]
+            else:
+                db["leagues"][al]["teams"]["預設新球隊"] = []  # 🚀 真正開好房間！
+                db["active_team"] = "預設新球隊"
+                
+        save_fantasy_db(db)
+        return {"status": "success"}
+        
+    except Exception as e:
+        return {"status": "error", "message": f"切換失敗: {str(e)}"}
+    
 # --- 1. 我的球隊 API (支援層級回傳) ---
 @app.get("/fantasy/yahoo-team")
 def get_yahoo_fantasy_team():
