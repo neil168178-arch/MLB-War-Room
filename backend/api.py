@@ -1614,42 +1614,55 @@ def save_fantasy_db(db_data):
     return local_ok, fb_ok, fb_msg
 
 
-# --- 🔗 全新切換聯盟/球隊 API (防彈升級版) ---
+# --- 🔗 全新切換聯盟/球隊 API (全容錯萬能版) ---
 class SwitchContextRequest(BaseModel):
-    league: str
-    team: str
+    league: Optional[str] = None
+    league_name: Optional[str] = None
+    team: Optional[str] = None
+    team_name: Optional[str] = None
 
 @app.post("/fantasy/switch-context")
 def switch_context(req: SwitchContextRequest):
     try:
         db = load_fantasy_db()
-        al = req.league
         
-        # 🛡️ 防呆 1：確保基礎結構存在
+        # 💡 雙向容錯：不管前端傳 league 還是 league_name，通通拿得到！
+        target_league = (req.league or req.league_name or "").strip()
+        target_team = (req.team or req.team_name or "").strip()
+        
+        # 若未傳入聯盟，維持當前聯盟
+        if not target_league:
+            target_league = db.get("active_league", "👑 我的自創聯盟")
+            
         if "leagues" not in db:
             db["leagues"] = {}
-        if al not in db["leagues"]:
-            db["leagues"][al] = {"teams": {}}
             
-        db["active_league"] = al
+        # 確保聯盟資料結構存在
+        if target_league not in db["leagues"]:
+            db["leagues"][target_league] = {
+                "teams": {},
+                "weights": DEFAULT_WEIGHTS.get("hitter", {}),
+                "ignored_players": []
+            }
+            
+        db["active_league"] = target_league
         
-        if req.team: 
-            at = req.team
-            # 🛡️ 防呆 2：如果切換過去的球隊剛好不見了，幫它建一個空名單
-            if at not in db["leagues"][al].get("teams", {}):
-                db["leagues"][al].setdefault("teams", {})[at] = []
-            db["active_team"] = at
+        # 如果有指定球隊名字
+        if target_team:
+            if target_team not in db["leagues"][target_league].get("teams", {}):
+                db["leagues"][target_league].setdefault("teams", {})[target_team] = []
+            db["active_team"] = target_team
         else:
-            # 🛡️ 防呆 3：如果只切換聯盟，自動選擇第一支球隊；若無則「確實建立」預設新球隊
-            teams = db["leagues"][al].get("teams", {})
+            # 若無指定球隊，自動選擇該聯盟第一支；若無則自動建立預設球隊
+            teams = db["leagues"][target_league].get("teams", {})
             if teams:
                 db["active_team"] = list(teams.keys())[0]
             else:
-                db["leagues"][al]["teams"]["預設新球隊"] = []  # 🚀 真正開好房間！
+                db["leagues"][target_league].setdefault("teams", {})["預設新球隊"] = []
                 db["active_team"] = "預設新球隊"
                 
         save_fantasy_db(db)
-        return {"status": "success"}
+        return {"status": "success", "message": f"成功切換至: {target_league} - {db['active_team']}"}
         
     except Exception as e:
         return {"status": "error", "message": f"切換失敗: {str(e)}"}
