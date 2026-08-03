@@ -2875,3 +2875,22 @@ def auto_update_real_pts():
         json.dump(db, f, indent=4, ensure_ascii=False)
 
     return {"message": f"🤖 自動計分完畢！已成功更新 {start_date} 至 {end_date} 期間，共 {updated_count} 位球員的分數。"}
+@app.get("/fantasy/force-sync-local")
+def force_sync_local_to_firebase():
+    """🚀 核彈級按鈕：強制把本地 (Streamlit) 的正確資料，上傳覆蓋整個 Firebase！"""
+    try:
+        # 1. 強制只讀取本地的 JSON 檔案
+        with open("fantasy_db.json", "r", encoding="utf-8") as f:
+            local_db = json.load(f)
+            
+        # 2. 強制推送到 Firebase 覆蓋一切
+        if FIREBASE_URL:
+            res = requests.put(FIREBASE_URL, json=local_db, timeout=5)
+            if res.status_code == 200:
+                return {"status": "success", "message": "✅ 太神啦！已成功將 Streamlit 的正確資料強制覆蓋到雲端！"}
+            else:
+                return {"status": "error", "message": f"雲端拒絕接收: {res.status_code}"}
+        return {"status": "success", "message": "✅ 本地讀取成功 (目前未連接 Firebase)"}
+        
+    except Exception as e:
+        return {"status": "error", "message": f"發生錯誤: {str(e)}"}
